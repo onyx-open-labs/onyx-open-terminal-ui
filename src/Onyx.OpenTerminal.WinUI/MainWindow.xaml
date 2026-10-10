@@ -1,0 +1,12 @@
+<Window
+    x:Class="Onyx.OpenTerminal.WinUI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Onyx Open Terminal">
+    <Grid>
+        <TextBlock Text="Onyx Open Terminal"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Style="{StaticResource TitleTextBlockStyle}" />
+    </Grid>
+</Window>
