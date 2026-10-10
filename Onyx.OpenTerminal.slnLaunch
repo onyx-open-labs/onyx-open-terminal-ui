@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "Onyx Open Terminal",
+    "Projects": [
+      {
+        "Path": "src\\Onyx.OpenTerminal.WinUI\\Onyx.OpenTerminal.WinUI.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

@@ -2,9 +2,9 @@
 
 ## Purpose and Boundaries
 
-This repository contains the Onyx Open Terminal UI solution. The initial
-production project is a framework-neutral .NET 10 library under src/.
-Do not choose a UI framework or add application features as part of scaffolding.
+This repository contains the Onyx Open Terminal UI solution. The production
+project is the .NET 10 WinUI desktop application under src/.
+Keep changes focused on the requested application features.
 Keep production code under src/, matching tests under tests/, documentation under
 docs/, build automation under build/, and deployment assets under deploy/.
 

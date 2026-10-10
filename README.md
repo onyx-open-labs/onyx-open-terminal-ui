@@ -1,12 +1,13 @@
 # Onyx Open Terminal UI
 
-Initial .NET solution scaffold for Onyx Open Terminal UI.
+Onyx Open Terminal UI WinUI desktop application.
 
 ## Prerequisites
 
 - .NET 10 SDK 10.0.301 or a later stable 10.0 SDK (see global.json).
 - PowerShell 7 for the optional build scripts.
 - Internet access to NuGet.org for initial restore.
+- Windows 10 version 1809 or later with WinUI development tooling for the desktop host.
 
 ## Build and Test
 
@@ -23,8 +24,7 @@ The solution can be opened in a Visual Studio version supporting .NET 10.
 
 ## Structure
 
-- `src/Onyx.OpenTerminal.UI/`: framework-neutral UI library scaffold.
-- `tests/Onyx.OpenTerminal.UI.Tests/`: matching xUnit tests.
+- `src/Onyx.OpenTerminal.WinUI/`: unpackaged WinUI desktop application.
 - `docs/`: architecture, decisions, and agent workflows.
 - `build/`: restore/build/test automation.
 - `deploy/`: reserved deployment documentation.
@@ -42,3 +42,20 @@ Use Gitflow. Branch features from `develop` as `feature/OOT-<number>-<descriptio
 Merge changes into `develop`, `test`, and `main` only through reviewed pull requests.
 Promote validated changes from `develop` to `test`, then from `test` to `main`.
 Never push commits directly to these integration branches.
+
+## WinUI desktop application
+
+- Project: src/Onyx.OpenTerminal.WinUI/Onyx.OpenTerminal.WinUI.csproj.
+- Requires Windows 10 version 1809 or later, the .NET 10 SDK, and Windows
+  development tooling (Visual Studio with the WinUI application development workload).
+- The unpackaged application bundles the Windows App SDK runtime; .NET 10
+  remains framework-dependent. No MSIX registration is required.
+- Build the solution using the commands above (Any CPU maps the WinUI app to x64),
+  or select x64/x86 explicitly in Visual Studio.
+- WinUI is the sole solution project and the debugging startup target. The shared
+  Onyx.OpenTerminal.slnLaunch profile starts it with debugging. Use the Unpackaged profile,
+  or run dotnet run --project src/Onyx.OpenTerminal.WinUI.
+- CI uses a Windows agent because WinUI's XAML compiler requires Windows.
+
+The unused UI library and its scaffold test project have been removed. There are
+currently no automated test projects; validation consists of build and launch checks.
