@@ -1,0 +1,24 @@
+trigger:
+  branches:
+    include:
+      - develop
+      - test
+      - main
+
+pr:
+  branches:
+    include:
+      - develop
+      - test
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: UseDotNet@2
+    inputs:
+      packageType: sdk
+      useGlobalJson: true
+  - pwsh: ./build/test.ps1
+    displayName: Restore, build, and test
