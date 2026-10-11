@@ -41,3 +41,7 @@ Follow root guidance in addition to a selected brief or skill.
 Use [dotnet-github-security](.agents/skills/dotnet-github-security/SKILL.md)
 when configuring or repairing .NET security checks in GitHub Actions. It reuses
 repository-validation for solution checks.
+
+Use [dotnet-beta-pipeline](.agents/skills/dotnet-beta-pipeline/SKILL.md)
+when configuring, repairing, or verifying the develop-to-test beta pipeline,
+installer packaging, release artifacts, and tester handoff.

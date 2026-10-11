@@ -21,6 +21,11 @@ Use [dotnet-github-security](../.agents/skills/dotnet-github-security/SKILL.md)
 for NuGet Audit, Gitleaks, and CodeQL workflow setup or repair. It covers
 eligibility, merge triggers, scan scope, reports, and failure verification,
 and reuses repository-validation rather than duplicating solution checks.
+Use [dotnet-beta-pipeline](../.agents/skills/dotnet-beta-pipeline/SKILL.md)
+for develop-to-test promotion, Windows beta installers, version metadata,
+artifacts, status badges, and installation/upgrade verification handoff.
+It reuses the existing packaging scripts and repository-validation skill, and
+distinguishes local checks, hosted workflow results, and manual verification.
 No automatic discovery or delegation was verified in an external agent runtime.
 The manual fallback requires only file reading and a shell, and was exercised
 during scaffold validation.
