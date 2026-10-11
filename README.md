@@ -1,5 +1,14 @@
 # Onyx Open Terminal UI
 
+[![develop pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/develop-build-test.yml?event=pull_request&label=develop)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/develop-build-test.yml)
+[![test pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/test-beta.yml?event=pull_request&label=test)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/test-beta.yml)
+[![main pipeline not configured](https://img.shields.io/badge/main-not%20configured-lightgrey)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions?query=branch%3Amain)
+
+Badges show the latest result of each branch's dedicated integration workflow.
+The `test` badge reports automated testing and packaging; manual installer and
+upgrade verification is recorded separately. Until its first run, a workflow
+badge may show no status. A `main` pipeline has not yet been configured.
+
 Onyx Open Terminal UI WinUI desktop application.
 
 ## Prerequisites
@@ -25,13 +34,14 @@ The solution can be opened in a Visual Studio version supporting .NET 10.
 ## Structure
 
 - `src/Onyx.OpenTerminal.WinUI/`: unpackaged WinUI desktop application.
+- `tests/Onyx.OpenTerminal.WinUI.Tests/`: window configuration tests.
 - `docs/`: architecture, decisions, and agent workflows.
 - `build/`: restore/build/test automation.
 - `deploy/`: reserved deployment documentation.
 - `AI.md`: shared AI guidance; `AGENTS.md` points agents to it.
 - `agents/`: manually selected specialised-agent briefs.
 - `.agents/skills/`: repository skills in SKILL.md format.
-- `azure-pipelines.yml`: validation pipeline scaffold; no deployment.
+- `.github/workflows/`: GitHub Actions build and test automation.
 
 See [structure decisions](docs/decisions/0001-repository-structure.md) and
 [AI workflow](docs/ai-workflow.md).
@@ -52,10 +62,66 @@ Never push commits directly to these integration branches.
   remains framework-dependent. No MSIX registration is required.
 - Build the solution using the commands above (Any CPU maps the WinUI app to x64),
   or select x64/x86 explicitly in Visual Studio.
-- WinUI is the sole solution project and the debugging startup target. The shared
+- WinUI is the debugging startup target. The shared
   Onyx.OpenTerminal.slnLaunch profile starts it with debugging. Use the Unpackaged profile,
   or run dotnet run --project src/Onyx.OpenTerminal.WinUI.
 - CI uses a Windows agent because WinUI's XAML compiler requires Windows.
 
-The unused UI library and its scaffold test project have been removed. There are
-currently no automated test projects; validation consists of build and launch checks.
+## Automated tests
+
+Run the full suite from the repository root, locally or in a GitHub Actions
+Windows runner:
+
+```powershell
+pwsh -NoProfile -File ./build/test.ps1
+```
+
+This non-interactive command restores and builds the solution in Release, then
+runs every test project through VSTest. Restore, build, and test failures return
+a non-zero process exit code. Use the same Windows prerequisites listed above;
+GitHub Actions must install the SDK required by global.json before running it.
+The individual restore/build/test commands above are equivalent when each
+failure is checked by the caller. Do not use --no-build without first building.
+
+`tests/Onyx.OpenTerminal.WinUI.Tests/` uses xUnit and the Visual Studio test
+adapter with Microsoft.NET.Test.Sdk. It targets the application's Windows .NET
+10 framework and defaults to x64 (x86 follows the solution configuration). Its project reference tests the compiled desktop
+host's window type; a copied production XAML file verifies the declared title
+and centered welcome text. These tests do not activate a window or require an
+interactive desktop. They are configuration tests, not UI automation.
+
+## GitHub Actions after integration
+
+`.github/workflows/develop-build-test.yml` handles pull request `closed` events
+targeting `develop`. Its build-and-test job runs only when the PR was merged;
+closing without merging produces a skipped job and executes no build or tests.
+PRs targeting other branches do not start this workflow.
+
+The Windows runner checks out the updated `develop` branch, installs the SDK
+from `global.json`, restores dependencies, builds Release, and runs every test
+project in the solution. Each command has its own logged step and a non-zero
+exit code fails the job. Test output appears in the logs, and available TRX
+results are uploaded as a workflow artifact even when tests fail.
+
+To verify after merging, open the repository's Actions tab and select
+"Build, test, and security after develop merge". Confirm the checkout, SDK, restore,
+build, and test steps pass and download the test-results artifact as needed.
+
+### Security checks
+
+The same merge event starts three independent security jobs. A build or scan
+failure does not prevent the other jobs from running:
+
+- NuGet Audit forces a fresh restore and checks direct and transitive packages
+  at every severity. Vulnerabilities and audit/restore warnings fail the job.
+  A JSON dependency report is uploaded when available.
+- Gitleaks CLI scans the history reachable from the updated `develop` branch.
+  Detected secrets fail the job; logs and the SARIF report redact secret values.
+  The pinned CLI release is verified against its published SHA-256 checksum.
+  The free CLI requires no Gitleaks Action organization license.
+- CodeQL builds the C# solution on Windows and runs its extended security
+  queries. Results appear in GitHub's Security tab and a SARIF artifact. The
+  job fails when findings are present or analysis fails. Findings require
+  review and may include false positives. CodeQL is free for this public repo;
+  private repositories require GitHub Code Security. Use advanced setup for
+  this workflow; GitHub's CodeQL default setup must be disabled if enabled.
