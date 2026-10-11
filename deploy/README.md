@@ -14,3 +14,8 @@ release and verified using its Authenticode publisher signature. Separate smoke
 jobs download, install, launch and uninstall the actual x64/x86 candidate artifacts.
 Pull requests also validate installers before promotion. Manual clean-machine
 and upgrade checks remain pending. Build outputs belong in the ignored artifacts/ directory.
+
+After both smoke jobs pass, the promotion workflow publishes a versioned GitHub
+pre-release containing installers, tester handoff/smoke evidence, unit-test
+reports and checksums. Release notes include changes and pending manual checks.
+Only the publishing job has repository content write permission.

@@ -17,6 +17,8 @@ Resolve repository-relative paths from the repository root:
 - `build/package-beta.ps1`: self-contained publishing, versioning and installer compilation.
 - `build/install-compiler.ps1`: official compiler download and signature verification.
 - `build/test-installer.ps1`: installed-app window/version and uninstall smoke test.
+- `build/publish-beta.ps1`: evidence verification, release assets and GitHub pre-release publishing.
+- `tests/ReleasePipeline/test-publish-beta.ps1`: preparation and publication failure guards.
 - `.github/workflows/installer-smoke.yml`: pre-merge installer smoke validation.
 - `deploy/installer.iss` and `deploy/version.json`: installer definition and base version.
 - `deploy/BETA-TESTING.md`, `deploy/KNOWN-ISSUES.md`, and
@@ -70,6 +72,16 @@ Inspect generated installer metadata and handoff contents. Upload installers,
 release identity, changes, known issues, instructions and a pending results record.
 Retain candidates and test reports for the documented 90 days, subject to repository
 limits. Keep generated outputs and downloaded tools under ignored artifacts/.
+
+Publish a versioned GitHub pre-release only after solution validation, packaging,
+and both installer smoke jobs succeed. Grant contents: write only to that job.
+Verify matching commit/version/architecture and PASS evidence before any write.
+Tag the exact tested merge commit, attach both installers, handoff/smoke evidence,
+unit-test reports and SHA256 checksums, and state pending manual checks in the notes.
+Never replace a published version. Rerun the full promotion workflow after failure
+to keep artifact attempt names and candidate versions aligned. PR builds test
+release preparation without creating public releases. Release assets remain
+available separately from the 90-day Actions artifact expiry.
 
 ## Verification and reporting
 

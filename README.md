@@ -5,11 +5,16 @@
 [![main pipeline not configured](https://img.shields.io/badge/main-not%20configured-lightgrey)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions?query=branch%3Amain)
 
 Badges show the latest result of each branch's dedicated integration workflow.
-The `test` badge reports automated testing, packaging and installer smoke tests;
-manual clean-machine and upgrade verification is recorded separately. Until its first run, a workflow
+The `test` badge reports automated testing, packaging, installer smoke tests and
+pre-release publishing; manual clean-machine and upgrade verification is recorded
+separately. Until its first run, a workflow
 badge may show no status. A `main` pipeline has not yet been configured.
 
 Onyx Open Terminal UI WinUI desktop application.
+
+Beta installers are published as [GitHub pre-releases](https://github.com/onyx-open-labs/onyx-open-terminal-ui/releases)
+after successful develop-to-test promotion and x64/x86 installer smoke tests.
+Each pre-release includes installers, release notes, checksums and test evidence.
 
 ## Prerequisites
 

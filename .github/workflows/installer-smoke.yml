@@ -10,10 +10,20 @@ on:
       - '.github/workflows/test-beta.yml'
       - 'Directory.Build.*'
       - 'global.json'
+      - 'tests/ReleasePipeline/**'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  release-checks:
+    name: Validate pre-release preparation and failure guards
+    runs-on: windows-2025
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify release assets, evidence guards and publication arguments
+        shell: pwsh
+        run: ./tests/ReleasePipeline/test-publish-beta.ps1
   smoke:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     name: Package and smoke test (${{ matrix.architecture }})
