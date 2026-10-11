@@ -13,7 +13,9 @@ registration. A tool without delegation can follow the same brief itself.
 ## Skills
 Skills live in .agents/skills/<skill-name>/SKILL.md. Each file has YAML name and
 description metadata followed by steps. The repository-validation skill is the
-initial example. Tools supporting this discovery convention may expose it;
+initial example. Use [dotnet-test-project](../.agents/skills/dotnet-test-project/SKILL.md)
+when adding or repairing test infrastructure; it reuses repository-validation
+for solution checks. Tools supporting this discovery convention may expose them;
 otherwise read the file explicitly and execute the steps.
 No automatic discovery or delegation was verified in an external agent runtime.
 The manual fallback requires only file reading and a shell, and was exercised

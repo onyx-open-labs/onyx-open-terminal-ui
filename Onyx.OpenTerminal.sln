@@ -63,6 +63,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onyx.OpenTerminal.WinUI.Tests", "tests\Onyx.OpenTerminal.WinUI.Tests\Onyx.OpenTerminal.WinUI.Tests.csproj", "{66E70FDE-9197-4488-9A23-F3980B47F748}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-test-project", "dotnet-test-project", "{6E3F815B-E063-40E5-86A8-E269361073D8}"
+	ProjectSection(SolutionItems) = preProject
+		.agents\skills\dotnet-test-project\SKILL.md = .agents\skills\dotnet-test-project\SKILL.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +107,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{6E3F815B-E063-40E5-86A8-E269361073D8} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
 		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{801AF8BC-5FEE-4C00-BB26-EC788427F389} = {5DE59DD8-7610-4A7E-B5BA-D11199CF0639}
 		{B96685A4-63AF-4995-A0D5-421CB91EB441} = {CF99AE71-6BE5-4CD2-A8F7-7DA137DE73DB}
