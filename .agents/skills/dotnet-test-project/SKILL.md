@@ -1,6 +1,6 @@
 ---
 name: dotnet-test-project
-description: Create or repair a .NET test project and its solution integration, including framework compatibility, test discovery, and CI exit-code verification. Use for test infrastructure setup, rather than simply adding tests to an existing configured project.
+description: Create or repair a .NET test project and solution integration, including framework compatibility, test discovery and local full-suite failure handling. Use for test-project infrastructure, not GitHub Actions orchestration or routine additions to an existing test project.
 ---
 
 # .NET Test Project Setup
@@ -59,6 +59,8 @@ the final suite after restoring it; never commit the deliberate failure.
 
 Update the setup documentation with prerequisites, a non-interactive root
 command for the full suite, required OS and architecture, and exit-code behavior.
-Reuse the existing build entry point where possible. Do not add or change a CI
-workflow unless requested. Report the passing test count, build result, and
+Reuse the existing build entry point where possible. When workflow changes are
+also requested, use the owner listed in docs/ai-workflow.md; this skill does not
+define branch triggers, scanner jobs, installer packaging or release publishing.
+Report the passing test count, build result, and
 observed failure and final success exit codes, including any verification gaps.

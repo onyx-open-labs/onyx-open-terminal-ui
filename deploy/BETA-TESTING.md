@@ -1,7 +1,9 @@
 # Beta installation and verification
 
-Download the matching x64 or x86 artifact from the successful `Package beta after
-develop merges into test` GitHub Actions run. Extract the ZIP, read release.json,
+Download the matching x64 or x86 installer from the repository's GitHub Releases
+page. Successful develop-to-test promotions publish a versioned pre-release only
+after solution validation and both installer smoke tests pass. Download the matching
+evidence ZIP as well and read release.json,
 CHANGES.txt and KNOWN-ISSUES.md, then run the setup executable. Installation is
 per-user and includes the .NET and Windows App SDK runtimes. MIT terms are shown
 by setup and LICENSE is installed with the application. Use the Start menu shortcut.
@@ -10,7 +12,42 @@ Candidates use deploy/version.json plus the workflow run number and retry attemp
 `0.1.0-beta.<run>.<attempt>`. release.json links the candidate to its exact commit
 and workflow. The executable file version uses the numeric `<base>.<run>` format.
 
+Each pre-release uses tag `v<version>` at the exact tested merge commit and includes
+both setup executables, architecture evidence ZIPs, solution test reports and
+SHA256SUMS.txt. Release notes identify the source/workflow, changes, known issues
+and pending manual checks. PR builds do not publish releases. An upload failure may
+leave an unpublished draft; inspect the failed publishing job and rerun the entire
+promotion workflow so all artifacts share the new attempt/version. Published
+versions are never overwritten. GitHub release assets do not use the Actions
+artifact 90-day expiry; retain prior beta releases for upgrade verification.
+
 ## Clean installation check
+
+### Automated installer smoke test
+
+The beta promotion workflow downloads each x64/x86 installer onto a separate
+Windows runner, installs it silently in a temporary directory, checks application
+resources, version/publisher/licence metadata and the Start menu shortcut, then
+launches the installed executable from a different working directory. It requires
+a visible, responsive window with the exact candidate version to remain open for
+five seconds. An early exit or a 60-second window timeout fails the workflow.
+Finally it uninstalls and checks removal of the executable, shortcut and Installed
+Apps registration. Cleanup is attempted even when launch fails.
+
+The `Validate installer on pull requests` workflow runs the same checks before
+merging application, packaging or pipeline changes. Its build is a review candidate;
+the promotion workflow tests the exact installer artifacts supplied to beta testers.
+Read the explicitly named installer smoke jobs, not just the unit-test/package jobs.
+Each architecture uploads `installer-smoke-*` (promotion) or `pr-installer-smoke-*`
+(review) evidence, including result.json, smoke.log, install/uninstall logs and
+relevant Windows Application events. Failure evidence uploads even when testing fails.
+
+Hosted runners contain development tools and these checks do not prove operation
+on a clean Windows machine or verify upgrade/data preservation. Complete the
+following manual checks as well. A downloadable installer from a failed run is
+not a verified candidate.
+
+### Manual clean-machine verification
 
 Use a clean Windows VM of the matching architecture without a prior installation
 or preinstalled development runtimes. Install, launch, check the version displayed
@@ -22,7 +59,7 @@ Record results in test-results.md, with screenshots/logs as evidence.
 ## Upgrade check
 
 Retrieve the most recent previously verified beta of the same architecture from
-its workflow artifacts. Install it in a fresh VM and launch it. When settings or
+GitHub Releases (or workflow artifacts for older candidates). Install it in a fresh VM and launch it. When settings or
 data features exist, create representative settings/data and record their values.
 Close it and run the new installer without uninstalling the old version. Launch,
 verify the new version, preserved settings/data, available core functions, one
@@ -32,7 +69,8 @@ later beta is a blocked check, not a pass or first-beta exemption.
 
 ## Handoff and retention
 
-Installer/upgrade verification is manual until application automation exists.
+Clean-machine and upgrade verification remain manual; automated installer smoke
+results are recorded separately from those checks.
 Do not mark OOT-5 complete or approve a candidate without the required recorded
 results. Attach completed test-results.md and evidence to the Jira release work.
 Report bugs in Jira with candidate version, commit, architecture, reproduction
