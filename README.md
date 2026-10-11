@@ -32,7 +32,7 @@ The solution can be opened in a Visual Studio version supporting .NET 10.
 - `AI.md`: shared AI guidance; `AGENTS.md` points agents to it.
 - `agents/`: manually selected specialised-agent briefs.
 - `.agents/skills/`: repository skills in SKILL.md format.
-- `azure-pipelines.yml`: validation pipeline scaffold; no deployment.
+- `.github/workflows/`: GitHub Actions build and test automation.
 
 See [structure decisions](docs/decisions/0001-repository-structure.md) and
 [AI workflow](docs/ai-workflow.md).

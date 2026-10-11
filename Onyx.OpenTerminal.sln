@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		AI.md = AI.md
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
-		azure-pipelines.yml = azure-pipelines.yml
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		Onyx.OpenTerminal.slnLaunch = Onyx.OpenTerminal.slnLaunch
