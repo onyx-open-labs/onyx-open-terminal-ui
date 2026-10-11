@@ -5,8 +5,8 @@
 [![main pipeline not configured](https://img.shields.io/badge/main-not%20configured-lightgrey)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions?query=branch%3Amain)
 
 Badges show the latest result of each branch's dedicated integration workflow.
-The `test` badge reports automated testing and packaging; manual installer and
-upgrade verification is recorded separately. Until its first run, a workflow
+The `test` badge reports automated testing, packaging and installer smoke tests;
+manual clean-machine and upgrade verification is recorded separately. Until its first run, a workflow
 badge may show no status. A `main` pipeline has not yet been configured.
 
 Onyx Open Terminal UI WinUI desktop application.

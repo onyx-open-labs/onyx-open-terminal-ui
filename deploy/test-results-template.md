@@ -8,7 +8,8 @@ Previous beta version / artifact URL:
 
 | Check | Result (PASS / FAIL / N/A) | Evidence |
 | --- | --- | --- |
-| Clean install | PENDING | |
+| Automated installer smoke test (each architecture) | PENDING | Link workflow smoke job and result.json |
+| Manual clean-machine install | PENDING | |
 | Launch and displayed version | PENDING | |
 | Product, publisher, licence metadata | PENDING | |
 | Uninstall and shortcut removal | PENDING | |

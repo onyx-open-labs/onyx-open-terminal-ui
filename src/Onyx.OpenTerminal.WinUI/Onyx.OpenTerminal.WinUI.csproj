@@ -19,4 +19,18 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
   </ItemGroup>
+  <!-- WinUI copies these resources to build output, but does not include them in
+       this unpackaged project's dotnet publish output automatically. -->
+  <Target Name="PublishApplicationXamlResources" AfterTargets="ComputeFilesToPublish"
+          DependsOnTargets="Prep_ComputeProcessXamlFiles">
+    <ItemGroup>
+      <_ApplicationXamlResource Include="@(GeneratedXamlDest);$(TargetDir)$(AssemblyName).pri" />
+      <ResolvedFileToPublish Include="@(_ApplicationXamlResource)">
+        <RelativePath>$([MSBuild]::MakeRelative('$(TargetDir)', '%(_ApplicationXamlResource.FullPath)'))</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+    <Error Condition="!Exists('%(_ApplicationXamlResource.Identity)')"
+           Text="Required application XAML resource is missing: %(_ApplicationXamlResource.Identity)" />
+  </Target>
 </Project>

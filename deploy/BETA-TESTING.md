@@ -12,6 +12,32 @@ and workflow. The executable file version uses the numeric `<base>.<run>` format
 
 ## Clean installation check
 
+### Automated installer smoke test
+
+The beta promotion workflow downloads each x64/x86 installer onto a separate
+Windows runner, installs it silently in a temporary directory, checks application
+resources, version/publisher/licence metadata and the Start menu shortcut, then
+launches the installed executable from a different working directory. It requires
+a visible, responsive window with the exact candidate version to remain open for
+five seconds. An early exit or a 60-second window timeout fails the workflow.
+Finally it uninstalls and checks removal of the executable, shortcut and Installed
+Apps registration. Cleanup is attempted even when launch fails.
+
+The `Validate installer on pull requests` workflow runs the same checks before
+merging application, packaging or pipeline changes. Its build is a review candidate;
+the promotion workflow tests the exact installer artifacts supplied to beta testers.
+Read the explicitly named installer smoke jobs, not just the unit-test/package jobs.
+Each architecture uploads `installer-smoke-*` (promotion) or `pr-installer-smoke-*`
+(review) evidence, including result.json, smoke.log, install/uninstall logs and
+relevant Windows Application events. Failure evidence uploads even when testing fails.
+
+Hosted runners contain development tools and these checks do not prove operation
+on a clean Windows machine or verify upgrade/data preservation. Complete the
+following manual checks as well. A downloadable installer from a failed run is
+not a verified candidate.
+
+### Manual clean-machine verification
+
 Use a clean Windows VM of the matching architecture without a prior installation
 or preinstalled development runtimes. Install, launch, check the version displayed
 in the window title against release.json, and verify the welcome screen. Check
@@ -32,7 +58,8 @@ later beta is a blocked check, not a pass or first-beta exemption.
 
 ## Handoff and retention
 
-Installer/upgrade verification is manual until application automation exists.
+Clean-machine and upgrade verification remain manual; automated installer smoke
+results are recorded separately from those checks.
 Do not mark OOT-5 complete or approve a candidate without the required recorded
 results. Attach completed test-results.md and evidence to the Jira release work.
 Report bugs in Jira with candidate version, commit, architecture, reproduction

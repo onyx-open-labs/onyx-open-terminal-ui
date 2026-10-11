@@ -36,6 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{0FF7C505
 		build\README.md = build\README.md
 		build\build.ps1 = build\build.ps1
 		build\test.ps1 = build\test.ps1
+		build\test-installer.ps1 = build\test-installer.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{F4033D27-CC22-41B0-8C6B-15F3B2DCE6C7}"
@@ -72,6 +73,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C0B2D381-C874-4195-A094-4DDE98E4A37E}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\develop-build-test.yml = .github\workflows\develop-build-test.yml
+		.github\workflows\test-beta.yml = .github\workflows\test-beta.yml
+		.github\workflows\installer-smoke.yml = .github\workflows\installer-smoke.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-github-security", "dotnet-github-security", "{426D70F3-3DED-4E17-B58F-2A9EFB64842D}"

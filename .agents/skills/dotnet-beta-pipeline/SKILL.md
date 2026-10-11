@@ -16,6 +16,8 @@ Resolve repository-relative paths from the repository root:
 - `.github/workflows/test-beta.yml`: promotion trigger, validation and packaging jobs.
 - `build/package-beta.ps1`: self-contained publishing, versioning and installer compilation.
 - `build/install-compiler.ps1`: official compiler download and signature verification.
+- `build/test-installer.ps1`: installed-app window/version and uninstall smoke test.
+- `.github/workflows/installer-smoke.yml`: pre-merge installer smoke validation.
 - `deploy/installer.iss` and `deploy/version.json`: installer definition and base version.
 - `deploy/BETA-TESTING.md`, `deploy/KNOWN-ISSUES.md`, and
   `deploy/test-results-template.md`: tester handoff and verification evidence.
@@ -60,6 +62,10 @@ execution. When changing compiler versions, check current official documentation
 compatibility and licensing; do not bypass failed signature checks.
 
 Propagate failures from restore, tests, publishing, compilation and artifact upload.
+Include generated application XAML resources in publish output. Verify both
+architecture installers through test-installer.ps1, including visible responsive
+window/version checks, cleanup and always-uploaded diagnostic evidence. The
+promotion smoke jobs must download the actual candidate artifacts on fresh runners.
 Inspect generated installer metadata and handoff contents. Upload installers,
 release identity, changes, known issues, instructions and a pending results record.
 Retain candidates and test reports for the documented 90 days, subject to repository
@@ -80,7 +86,8 @@ or expired baseline for later betas is a blocked check. Check settings/data
 preservation when those features exist; record a reason for any N/A result.
 
 Keep README badges linked to the actual dedicated workflows. A passing packaging
-badge does not mean manual installer checks passed. Represent absent workflows as
+badge includes automated installer smoke results, but does not mean manual
+clean-machine or upgrade checks passed. Represent absent workflows as
 not configured; do not invent passing status or add production workflows implicitly.
 
 After an authorized promotion, inspect hosted job results and downloaded artifacts
