@@ -1,9 +1,19 @@
 ---
-name: dotnet-github-security
-description: Configure or maintain NuGet Audit, Gitleaks, and CodeQL security checks in GitHub Actions for .NET repositories, including scan scope, reporting, and failure verification. Use for security workflow setup or repair, rather than routine application changes or test-project creation.
+name: github-develop-merge-action
+description: Create, repair, or review this project's GitHub Actions workflow after PR merges into develop, including solution build/tests, NuGet Audit, Gitleaks and CodeQL. Use for develop integration checks, not beta packaging, release publishing, pre-merge installer checks or .NET test-project setup.
 ---
 
-# .NET GitHub Security Checks
+# GitHub Develop Merge Action
+
+## Responsibility
+
+Own `.github/workflows/develop-build-test.yml`: its merge event, build/test job,
+three security jobs, permissions, reports and develop status badge. This skill
+does not own test-branch packaging/releases or the installer PR workflow; use
+[github-test-merge-action](../github-test-merge-action/SKILL.md) and
+[github-installer-pr-action](../github-installer-pr-action/SKILL.md) for those.
+Keep test-project setup in [dotnet-test-project](../dotnet-test-project/SKILL.md)
+and local solution validation in [repository-validation](../repository-validation/SKILL.md).
 
 ## Inspect the repository and requested scope
 
@@ -25,10 +35,9 @@ and CodeQL. Dependabot was removed by user request; preserve that scope unless
 the user requests a change. The WinUI solution requires Windows for restore,
 build, and CodeQL extraction. Use the SDK in `global.json`.
 
-## Preserve event and checkout semantics
+## Preserve develop event and checkout semantics
 
-For a merge-only PR workflow, filter `pull_request` to `types: [closed]` and
-the requested base branch, then guard every job with
+Filter `pull_request` to `types: [closed]` and base branch `develop`, then guard every job with
 `github.event.pull_request.merged == true`. An unmerged closure can create a
 skipped workflow entry; describe this accurately instead of claiming no event
 occurred. Do not substitute an unrestricted push trigger, which includes
@@ -40,6 +49,15 @@ branch and SHA; do not assume the event SHA matches a later branch checkout.
 Keep independent scans independent of the build/test job so one failure does
 not prevent other checks. Give jobs timeouts and grant write permissions only
 to jobs that need them, such as CodeQL's `security-events: write`.
+
+## Build and test integration
+
+Reuse the pinned SDK and root solution commands from repository-validation in
+the Windows build/test job. Build before running tests with --no-build, preserve
+native failure codes, and upload TRX reports even on failure. Verify a positive
+executed test count. Reuse the configured test project; a workflow repair should
+not create a second runner or duplicate the test-project setup procedure.
+Do not install/package the application or publish releases from this workflow.
 
 ## Configure the scanners
 

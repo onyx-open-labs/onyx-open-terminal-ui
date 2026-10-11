@@ -38,10 +38,15 @@ relevant files, constraints, and required checks. Delegation is optional and
 requires tooling that supports it; these files do not themselves start agents.
 Follow root guidance in addition to a selected brief or skill.
 
-Use [dotnet-github-security](.agents/skills/dotnet-github-security/SKILL.md)
-when configuring or repairing .NET security checks in GitHub Actions. It reuses
-repository-validation for solution checks.
+Select the skill owning the workflow being changed:
 
-Use [dotnet-beta-pipeline](.agents/skills/dotnet-beta-pipeline/SKILL.md)
-when configuring, repairing, or verifying the develop-to-test beta pipeline,
-installer packaging, release artifacts, and tester handoff.
+- [github-develop-merge-action](.agents/skills/github-develop-merge-action/SKILL.md):
+  post-merge develop build/tests and security scans.
+- [github-test-merge-action](.agents/skills/github-test-merge-action/SKILL.md):
+  develop-to-test promotion, shared installer/release helpers, smoke tests and pre-releases.
+- [github-installer-pr-action](.agents/skills/github-installer-pr-action/SKILL.md):
+  pre-merge installer validation and review evidence.
+
+Use repository-validation for shared local solution checks and dotnet-test-project
+for test-project setup. Workflow skills reuse these helpers rather than owning
+another copy of their procedures. See docs/ai-workflow.md for the responsibility map.

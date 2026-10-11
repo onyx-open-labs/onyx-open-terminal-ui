@@ -14,3 +14,17 @@ Full-suite command from the repository root (including GitHub Actions):
 It restores, builds Release, runs all solution tests, and returns the first
 failing command's non-zero exit code. No interactive steps are required.
 Tests use xUnit/VSTest and run as x64 on Windows; see the root README for setup.
+
+`test-installer.ps1` tests an actual generated installer: silent install,
+required XAML resources and metadata, shortcut target, visible responsive versioned
+window, and uninstall. It saves result.json and diagnostic logs and returns a
+failure when any check fails. It refuses to modify an existing installation;
+run on a fresh Windows runner/user. See deploy/BETA-TESTING.md for the workflow
+evidence and the remaining manual clean-machine/upgrade checks.
+
+`publish-beta.ps1` checks the downloaded promotion artifacts and PASS smoke
+evidence for both architectures, prepares installer/evidence assets and release
+notes, and publishes a GitHub pre-release at the exact tested commit using the
+GitHub CLI. Use `-PrepareOnly` to inspect output without publishing.
+Run `./tests/ReleasePipeline/test-publish-beta.ps1` to verify preparation,
+rejection of unsafe inputs and CLI argument/failure handling without network writes.

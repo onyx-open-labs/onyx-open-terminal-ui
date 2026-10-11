@@ -65,3 +65,84 @@ jobs:
           path: artifacts/beta-${{ matrix.architecture }}/*
           retention-days: 90
           if-no-files-found: error
+  smoke:
+    name: Installer smoke test (${{ matrix.architecture }})
+    needs: package
+    runs-on: windows-2025
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x64, x86]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: beta-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: candidate
+      - name: Install, launch, verify version and uninstall
+        shell: pwsh
+        run: |
+          $installer = @(Get-ChildItem candidate/*-setup.exe)
+          if ($installer.Count -ne 1) { throw 'Expected exactly one candidate installer.' }
+          ./build/test-installer.ps1 -InstallerPath $installer[0].FullName -ReleaseMetadataPath candidate/release.json -EvidenceDirectory artifacts/smoke-${{ matrix.architecture }}
+      - name: Upload installer smoke evidence (including failures)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: installer-smoke-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/smoke-${{ matrix.architecture }}/
+          retention-days: 90
+          if-no-files-found: error
+  release:
+    name: Publish GitHub beta pre-release
+    needs: [validate, package, smoke]
+    runs-on: windows-2025
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: beta-x64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/beta-x64
+      - uses: actions/download-artifact@v4
+        with:
+          name: beta-x86-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/beta-x86
+      - uses: actions/download-artifact@v4
+        with:
+          name: installer-smoke-x64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/smoke-x64
+      - uses: actions/download-artifact@v4
+        with:
+          name: installer-smoke-x86-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/smoke-x86
+      - uses: actions/download-artifact@v4
+        with:
+          name: beta-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/unit-tests
+      - name: Verify evidence and publish pre-release with installers
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: ./build/publish-beta.ps1 -ArtifactDirectory artifacts/release-input -OutputDirectory artifacts/release-output -Commit $env:SOURCE_COMMIT -Repository $env:RELEASE_REPOSITORY -RunUrl $env:RUN_URL
+      - name: Upload release preparation diagnostics
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: beta-release-preparation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/release-output/release-notes.md
+            artifacts/release-output/release-plan.json
+            artifacts/release-output/SHA256SUMS.txt
+          retention-days: 90
+          if-no-files-found: ignore

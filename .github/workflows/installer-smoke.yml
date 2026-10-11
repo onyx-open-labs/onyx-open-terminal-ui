@@ -1,0 +1,68 @@
+name: Validate installer on pull requests
+on:
+  pull_request:
+    branches: [develop, test]
+    paths:
+      - 'src/**'
+      - 'build/**'
+      - 'deploy/**'
+      - '.github/workflows/installer-smoke.yml'
+      - '.github/workflows/test-beta.yml'
+      - 'Directory.Build.*'
+      - 'global.json'
+      - 'tests/ReleasePipeline/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-checks:
+    name: Validate pre-release preparation and failure guards
+    runs-on: windows-2025
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify release assets, evidence guards and publication arguments
+        shell: pwsh
+        run: ./tests/ReleasePipeline/test-publish-beta.ps1
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    name: Package and smoke test (${{ matrix.architecture }})
+    runs-on: windows-2025
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x64, x86]
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Install installer compiler
+        run: ./build/install-compiler.ps1 -Destination "$env:RUNNER_TEMP/inno"
+      - name: Publish and package review candidate
+        env:
+          PREVIOUS_COMMIT: ${{ github.event.pull_request.base.sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          $commit = git rev-parse HEAD
+          if ($LASTEXITCODE) { throw 'Could not resolve candidate commit.' }
+          ./build/package-beta.ps1 -Architecture '${{ matrix.architecture }}' -BuildNumber $env:GITHUB_RUN_NUMBER -Attempt $env:GITHUB_RUN_ATTEMPT -Commit $commit -PreviousTestCommit $env:PREVIOUS_COMMIT -RunUrl $env:RUN_URL -CompilerPath "$env:RUNNER_TEMP/inno/ISCC.exe"
+      - name: Install, launch, verify version and uninstall
+        run: |
+          $installer = @(Get-ChildItem artifacts/beta-${{ matrix.architecture }}/*-setup.exe)
+          if ($installer.Count -ne 1) { throw 'Expected exactly one candidate installer.' }
+          ./build/test-installer.ps1 -InstallerPath $installer[0].FullName -ReleaseMetadataPath artifacts/beta-${{ matrix.architecture }}/release.json -EvidenceDirectory artifacts/smoke-${{ matrix.architecture }}
+      - name: Upload installer smoke evidence (including failures)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr-installer-smoke-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/smoke-${{ matrix.architecture }}/
+          retention-days: 90
+          if-no-files-found: error
