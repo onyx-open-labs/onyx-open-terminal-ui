@@ -81,6 +81,19 @@ host's window type; a copied production XAML file verifies the declared title
 and centered welcome text. These tests do not activate a window or require an
 interactive desktop. They are configuration tests, not UI automation.
 
-For OOT-3, use a Windows runner and the full-suite command above. Further test
-projects added to the solution will be discovered by that command. The GitHub
-Actions workflow is tracked separately in OOT-3.
+## GitHub Actions after integration
+
+`.github/workflows/develop-build-test.yml` handles pull request `closed` events
+targeting `develop`. Its build-and-test job runs only when the PR was merged;
+closing without merging produces a skipped job and executes no build or tests.
+PRs targeting other branches do not start this workflow.
+
+The Windows runner checks out the updated `develop` branch, installs the SDK
+from `global.json`, restores dependencies, builds Release, and runs every test
+project in the solution. Each command has its own logged step and a non-zero
+exit code fails the job. Test output appears in the logs, and available TRX
+results are uploaded as a workflow artifact even when tests fail.
+
+To verify after merging, open the repository's Actions tab and select
+"Build and test after develop merge". Confirm the checkout, SDK, restore,
+build, and test steps pass and download the test-results artifact as needed.

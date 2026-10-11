@@ -1,0 +1,45 @@
+name: Build and test after develop merge
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    if: github.event.pull_request.merged == true
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out updated develop
+        uses: actions/checkout@v5
+        with:
+          ref: develop
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore dependencies
+        run: dotnet restore Onyx.OpenTerminal.sln --verbosity normal
+
+      - name: Build application and tests
+        run: dotnet build Onyx.OpenTerminal.sln --configuration Release --no-restore --verbosity normal
+
+      - name: Run full test suite
+        run: dotnet test Onyx.OpenTerminal.sln --configuration Release --no-build --logger "console;verbosity=normal" --logger "trx;LogFilePrefix=tests" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: develop-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: TestResults/**/*.trx
+          if-no-files-found: ignore
