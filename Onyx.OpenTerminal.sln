@@ -78,14 +78,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\installer-smoke.yml = .github\workflows\installer-smoke.yml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-github-security", "dotnet-github-security", "{426D70F3-3DED-4E17-B58F-2A9EFB64842D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-develop-merge-action", "github-develop-merge-action", "{426D70F3-3DED-4E17-B58F-2A9EFB64842D}"
 	ProjectSection(SolutionItems) = preProject
-		.agents\skills\dotnet-github-security\SKILL.md = .agents\skills\dotnet-github-security\SKILL.md
+		.agents\skills\github-develop-merge-action\SKILL.md = .agents\skills\github-develop-merge-action\SKILL.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-beta-pipeline", "dotnet-beta-pipeline", "{59368BD6-4766-43D8-9B6E-C1D40A159CB4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-test-merge-action", "github-test-merge-action", "{59368BD6-4766-43D8-9B6E-C1D40A159CB4}"
 	ProjectSection(SolutionItems) = preProject
-		.agents\skills\dotnet-beta-pipeline\SKILL.md = .agents\skills\dotnet-beta-pipeline\SKILL.md
+		.agents\skills\github-test-merge-action\SKILL.md = .agents\skills\github-test-merge-action\SKILL.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-installer-pr-action", "github-installer-pr-action", "{8F5B7235-4C09-4EF5-ABDA-B1516E01F934}"
+	ProjectSection(SolutionItems) = preProject
+		.agents\skills\github-installer-pr-action\SKILL.md = .agents\skills\github-installer-pr-action\SKILL.md
 	EndProjectSection
 EndProject
 Global
@@ -127,6 +132,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{8F5B7235-4C09-4EF5-ABDA-B1516E01F934} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
 		{59368BD6-4766-43D8-9B6E-C1D40A159CB4} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
 		{426D70F3-3DED-4E17-B58F-2A9EFB64842D} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
 		{C0B2D381-C874-4195-A094-4DDE98E4A37E} = {F6251F49-F4D4-4AB0-8E57-FA860688F0AC}

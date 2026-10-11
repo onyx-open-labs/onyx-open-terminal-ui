@@ -11,21 +11,31 @@ to an available agent tool. Briefs are manually invoked and have no automatic
 registration. A tool without delegation can follow the same brief itself.
 
 ## Skills
-Skills live in .agents/skills/<skill-name>/SKILL.md. Each file has YAML name and
-description metadata followed by steps. The repository-validation skill is the
-initial example. Use [dotnet-test-project](../.agents/skills/dotnet-test-project/SKILL.md)
-when adding or repairing test infrastructure; it reuses repository-validation
-for solution checks. Tools supporting this discovery convention may expose them;
-otherwise read the file explicitly and execute the steps.
-Use [dotnet-github-security](../.agents/skills/dotnet-github-security/SKILL.md)
-for NuGet Audit, Gitleaks, and CodeQL workflow setup or repair. It covers
-eligibility, merge triggers, scan scope, reports, and failure verification,
-and reuses repository-validation rather than duplicating solution checks.
-Use [dotnet-beta-pipeline](../.agents/skills/dotnet-beta-pipeline/SKILL.md)
-for develop-to-test promotion, Windows beta installers, version metadata,
-artifacts, status badges, and installation/upgrade verification handoff.
-It reuses the existing packaging scripts and repository-validation skill, and
-distinguishes local checks, hosted workflow results, and manual verification.
+Skills live in .agents/skills/<skill-name>/SKILL.md. Folder names, YAML names and
+Solution Explorer labels match. GitHub workflow skills use the `github-` prefix
+and name the integration stage or PR check they own.
+
+| Skill | Owns | Reuses / boundary |
+| --- | --- | --- |
+| [github-develop-merge-action](../.agents/skills/github-develop-merge-action/SKILL.md) | develop-build-test.yml: merged develop PRs, solution build/tests, NuGet Audit, Gitleaks, CodeQL | Local solution validation; no installer/release jobs |
+| [github-test-merge-action](../.agents/skills/github-test-merge-action/SKILL.md) | test-beta.yml: develop-to-test promotion, shared packaging/smoke/release helpers, beta pre-releases | Local solution validation and tester procedures; no develop scans or PR event setup |
+| [github-installer-pr-action](../.agents/skills/github-installer-pr-action/SKILL.md) | installer-smoke.yml: pre-merge/manual review checks and evidence | Shared installer helpers and release failure tests; no public publishing or develop scans |
+| [dotnet-test-project](../.agents/skills/dotnet-test-project/SKILL.md) | .NET test-project/framework/discovery setup and local full-suite failure handling | Shared local solution validation; routes workflow changes to their stage owner |
+| [repository-validation](../.agents/skills/repository-validation/SKILL.md) | Shared local solution validation and clean-diff checks | Canonical commands in AI.md; no workflow configuration |
+
+Choose the workflow owner first; load a supporting skill only for work on its
+responsibility. Keep reusable mechanics in build/ scripts and tester procedures
+in deploy/ documentation. Update both callers when a shared helper contract changes.
+Do not copy helper implementations or create parallel skills for the same workflow.
+
+Some execution repeats are intentional: the test promotion validates its own merge
+commit and actual candidate artifacts, while PR checks validate a review merge.
+CodeQL needs a separate instrumented compilation for extraction. These checks
+serve distinct requirements and do not justify duplicating their skill procedures.
+No main/release-to-production workflow exists, so there is no placeholder main skill.
+
+Tools supporting this discovery convention may expose the skills; otherwise read
+the selected file explicitly and execute its instructions.
 No automatic discovery or delegation was verified in an external agent runtime.
 The manual fallback requires only file reading and a shell, and was exercised
 during scaffold validation.
