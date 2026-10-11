@@ -68,9 +68,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-test-project", "dotn
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F6251F49-F4D4-4AB0-8E57-FA860688F0AC}"
-	ProjectSection(SolutionItems) = preProject
-		.github\dependabot.yml = .github\dependabot.yml
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C0B2D381-C874-4195-A094-4DDE98E4A37E}"
 	ProjectSection(SolutionItems) = preProject

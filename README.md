@@ -116,12 +116,3 @@ failure does not prevent the other jobs from running:
   review and may include false positives. CodeQL is free for this public repo;
   private repositories require GitHub Code Security. Use advanced setup for
   this workflow; GitHub's CodeQL default setup must be disabled if enabled.
-
-Dependabot is separate from the merge workflow: `.github/dependabot.yml`
-requests weekly NuGet and GitHub Actions version-update PRs targeting `develop`.
-GitHub reads this configuration from the default branch (`main`), so it becomes
-active after the configuration is promoted there through a PR. Dependabot
-alerts and security-update PRs require enabling the dependency graph,
-Dependabot alerts, and security updates in repository security settings; they
-monitor the default branch, regardless of the version-update target above.
-The merge-triggered NuGet job provides the dependency security check on `develop`.
