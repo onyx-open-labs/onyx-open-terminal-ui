@@ -1,0 +1,67 @@
+name: Package beta after develop merges into test
+on:
+  pull_request:
+    branches: [test]
+    types: [closed]
+permissions:
+  contents: read
+jobs:
+  validate:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'develop' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - run: dotnet restore Onyx.OpenTerminal.sln
+      - run: dotnet build Onyx.OpenTerminal.sln -c Release --no-restore
+      - run: dotnet test Onyx.OpenTerminal.sln -c Release --no-build --logger trx --results-directory TestResults
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: beta-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: TestResults/*.trx
+          retention-days: 90
+          if-no-files-found: ignore
+  package:
+    needs: validate
+    runs-on: windows-2025
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x64, x86]
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Install installer compiler
+        run: |
+          ./build/install-compiler.ps1 -Destination "$env:RUNNER_TEMP/inno"
+      - name: Publish and package
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+          PREVIOUS_TEST_COMMIT: ${{ github.event.pull_request.base.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: ./build/package-beta.ps1 -Architecture '${{ matrix.architecture }}' -BuildNumber $env:GITHUB_RUN_NUMBER -Attempt $env:GITHUB_RUN_ATTEMPT -Commit $env:SOURCE_COMMIT -PreviousTestCommit $env:PREVIOUS_TEST_COMMIT -RunUrl $env:RUN_URL -CompilerPath "$env:RUNNER_TEMP/inno/ISCC.exe"
+      - name: Upload candidate and tester handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: beta-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/beta-${{ matrix.architecture }}/*
+          retention-days: 90
+          if-no-files-found: error
