@@ -17,6 +17,10 @@ initial example. Use [dotnet-test-project](../.agents/skills/dotnet-test-project
 when adding or repairing test infrastructure; it reuses repository-validation
 for solution checks. Tools supporting this discovery convention may expose them;
 otherwise read the file explicitly and execute the steps.
+Use [dotnet-github-security](../.agents/skills/dotnet-github-security/SKILL.md)
+for NuGet Audit, Gitleaks, and CodeQL workflow setup or repair. It covers
+eligibility, merge triggers, scan scope, reports, and failure verification,
+and reuses repository-validation rather than duplicating solution checks.
 No automatic discovery or delegation was verified in an external agent runtime.
 The manual fallback requires only file reading and a shell, and was exercised
 during scaffold validation.

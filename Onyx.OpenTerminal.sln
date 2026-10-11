@@ -74,6 +74,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\develop-build-test.yml = .github\workflows\develop-build-test.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-github-security", "dotnet-github-security", "{426D70F3-3DED-4E17-B58F-2A9EFB64842D}"
+	ProjectSection(SolutionItems) = preProject
+		.agents\skills\dotnet-github-security\SKILL.md = .agents\skills\dotnet-github-security\SKILL.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +118,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{426D70F3-3DED-4E17-B58F-2A9EFB64842D} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
 		{C0B2D381-C874-4195-A094-4DDE98E4A37E} = {F6251F49-F4D4-4AB0-8E57-FA860688F0AC}
 		{6E3F815B-E063-40E5-86A8-E269361073D8} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
 		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
