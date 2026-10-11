@@ -1,4 +1,4 @@
-name: Build and test after develop merge
+name: Build, test, and security after develop merge
 
 on:
   pull_request:
@@ -42,4 +42,127 @@ jobs:
         with:
           name: develop-test-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: TestResults/**/*.trx
+          if-no-files-found: ignore
+
+  dependency-security:
+    if: github.event.pull_request.merged == true
+    runs-on: windows-2025
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out updated develop
+        uses: actions/checkout@v5
+        with:
+          ref: develop
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Audit all NuGet dependencies
+        run: dotnet restore Onyx.OpenTerminal.sln --force --verbosity normal -p:NuGetAudit=true -p:NuGetAuditMode=all -p:NuGetAuditLevel=low -warnaserror
+      - name: Save vulnerability report
+        if: always()
+        run: |
+          dotnet package list --project Onyx.OpenTerminal.sln --vulnerable --include-transitive --no-restore --format json | Out-File -Encoding utf8 nuget-vulnerabilities.json
+          exit $LASTEXITCODE
+      - name: Upload dependency report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-security-${{ github.run_id }}-${{ github.run_attempt }}
+          path: nuget-vulnerabilities.json
+          if-no-files-found: ignore
+
+  secret-security:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out updated develop and history
+        uses: actions/checkout@v5
+        with:
+          ref: develop
+          fetch-depth: 0
+      - name: Install verified Gitleaks CLI
+        env:
+          GITLEAKS_VERSION: 8.30.1
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          checksums="gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          release="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          cd "$RUNNER_TEMP"
+          curl --fail --silent --show-error --location "$release/$archive" --output "$archive"
+          curl --fail --silent --show-error --location "$release/$checksums" --output "$checksums"
+          grep "  $archive$" "$checksums" | sha256sum --check --strict
+          tar -xzf "$archive" gitleaks
+      - name: Scan develop history for secrets
+        run: '"$RUNNER_TEMP/gitleaks" git . --log-opts="HEAD" --redact=100 --report-format sarif --report-path gitleaks.sarif'
+      - name: Upload redacted secret report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-security-${{ github.run_id }}-${{ github.run_attempt }}
+          path: gitleaks.sarif
+          if-no-files-found: ignore
+
+  code-security:
+    if: github.event.pull_request.merged == true
+    runs-on: windows-2025
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Check out updated develop
+        uses: actions/checkout@v5
+        with:
+          ref: develop
+      - name: Record scanned commit
+        id: revision
+        run: '"sha=$(git rev-parse HEAD)" >> $env:GITHUB_OUTPUT'
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Initialize CodeQL for C#
+        uses: github/codeql-action/init@v4
+        with:
+          languages: csharp
+          build-mode: manual
+          queries: security-extended
+      - name: Restore dependencies for analysis
+        run: dotnet restore Onyx.OpenTerminal.sln --verbosity normal
+      - name: Build application for analysis
+        run: dotnet build Onyx.OpenTerminal.sln --configuration Release --no-restore --verbosity normal --no-incremental
+      - name: Analyze and publish CodeQL findings
+        uses: github/codeql-action/analyze@v4
+        with:
+          output: codeql-results
+          category: develop-csharp
+          ref: refs/heads/develop
+          sha: ${{ steps.revision.outputs.sha }}
+      - name: Fail on CodeQL findings
+        run: |
+          $reports = @(Get-ChildItem codeql-results -Filter *.sarif -Recurse)
+          if ($reports.Count -eq 0) { throw 'CodeQL did not produce a SARIF report.' }
+          $findings = 0
+          foreach ($report in $reports) {
+              $sarif = Get-Content $report.FullName -Raw | ConvertFrom-Json
+              foreach ($run in $sarif.runs) {
+                  $findings += @($run.results).Count
+              }
+          }
+          Write-Host "CodeQL findings: $findings. Review the Security tab and report artifact."
+          if ($findings -gt 0) { throw 'CodeQL reported findings requiring review.' }
+      - name: Upload code security report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-security-${{ github.run_id }}-${{ github.run_attempt }}
+          path: codeql-results/**/*.sarif
           if-no-files-found: ignore

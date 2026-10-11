@@ -95,5 +95,33 @@ exit code fails the job. Test output appears in the logs, and available TRX
 results are uploaded as a workflow artifact even when tests fail.
 
 To verify after merging, open the repository's Actions tab and select
-"Build and test after develop merge". Confirm the checkout, SDK, restore,
+"Build, test, and security after develop merge". Confirm the checkout, SDK, restore,
 build, and test steps pass and download the test-results artifact as needed.
+
+### Security checks
+
+The same merge event starts three independent security jobs. A build or scan
+failure does not prevent the other jobs from running:
+
+- NuGet Audit forces a fresh restore and checks direct and transitive packages
+  at every severity. Vulnerabilities and audit/restore warnings fail the job.
+  A JSON dependency report is uploaded when available.
+- Gitleaks CLI scans the history reachable from the updated `develop` branch.
+  Detected secrets fail the job; logs and the SARIF report redact secret values.
+  The pinned CLI release is verified against its published SHA-256 checksum.
+  The free CLI requires no Gitleaks Action organization license.
+- CodeQL builds the C# solution on Windows and runs its extended security
+  queries. Results appear in GitHub's Security tab and a SARIF artifact. The
+  job fails when findings are present or analysis fails. Findings require
+  review and may include false positives. CodeQL is free for this public repo;
+  private repositories require GitHub Code Security. Use advanced setup for
+  this workflow; GitHub's CodeQL default setup must be disabled if enabled.
+
+Dependabot is separate from the merge workflow: `.github/dependabot.yml`
+requests weekly NuGet and GitHub Actions version-update PRs targeting `develop`.
+GitHub reads this configuration from the default branch (`main`), so it becomes
+active after the configuration is promoted there through a PR. Dependabot
+alerts and security-update PRs require enabling the dependency graph,
+Dependabot alerts, and security updates in repository security settings; they
+monitor the default branch, regardless of the version-update target above.
+The merge-triggered NuGet job provides the dependency security check on `develop`.
