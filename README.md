@@ -32,7 +32,7 @@ The solution can be opened in a Visual Studio version supporting .NET 10.
 - `AI.md`: shared AI guidance; `AGENTS.md` points agents to it.
 - `agents/`: manually selected specialised-agent briefs.
 - `.agents/skills/`: repository skills in SKILL.md format.
-- `azure-pipelines.yml`: validation pipeline scaffold; no deployment.
+- `.github/workflows/`: GitHub Actions build and test automation.
 
 See [structure decisions](docs/decisions/0001-repository-structure.md) and
 [AI workflow](docs/ai-workflow.md).
@@ -81,6 +81,38 @@ host's window type; a copied production XAML file verifies the declared title
 and centered welcome text. These tests do not activate a window or require an
 interactive desktop. They are configuration tests, not UI automation.
 
-For OOT-3, use a Windows runner and the full-suite command above. Further test
-projects added to the solution will be discovered by that command. The GitHub
-Actions workflow is tracked separately in OOT-3.
+## GitHub Actions after integration
+
+`.github/workflows/develop-build-test.yml` handles pull request `closed` events
+targeting `develop`. Its build-and-test job runs only when the PR was merged;
+closing without merging produces a skipped job and executes no build or tests.
+PRs targeting other branches do not start this workflow.
+
+The Windows runner checks out the updated `develop` branch, installs the SDK
+from `global.json`, restores dependencies, builds Release, and runs every test
+project in the solution. Each command has its own logged step and a non-zero
+exit code fails the job. Test output appears in the logs, and available TRX
+results are uploaded as a workflow artifact even when tests fail.
+
+To verify after merging, open the repository's Actions tab and select
+"Build, test, and security after develop merge". Confirm the checkout, SDK, restore,
+build, and test steps pass and download the test-results artifact as needed.
+
+### Security checks
+
+The same merge event starts three independent security jobs. A build or scan
+failure does not prevent the other jobs from running:
+
+- NuGet Audit forces a fresh restore and checks direct and transitive packages
+  at every severity. Vulnerabilities and audit/restore warnings fail the job.
+  A JSON dependency report is uploaded when available.
+- Gitleaks CLI scans the history reachable from the updated `develop` branch.
+  Detected secrets fail the job; logs and the SARIF report redact secret values.
+  The pinned CLI release is verified against its published SHA-256 checksum.
+  The free CLI requires no Gitleaks Action organization license.
+- CodeQL builds the C# solution on Windows and runs its extended security
+  queries. Results appear in GitHub's Security tab and a SARIF artifact. The
+  job fails when findings are present or analysis fails. Findings require
+  review and may include false positives. CodeQL is free for this public repo;
+  private repositories require GitHub Code Security. Use advanced setup for
+  this workflow; GitHub's CodeQL default setup must be disabled if enabled.

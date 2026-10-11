@@ -16,8 +16,9 @@ The initial repository contained README.md, LICENSE, and Visual Studio ignore ru
   template package versions in the single test project. Central package
   management and NuGet.config are unnecessary until shared versions or private
   sources are needed.
-- Provide a root Azure DevOps validation pipeline. Service connections, branch
-  policies, deployment, and release automation are separate work.
+- Use GitHub Actions for build and test automation under `.github/workflows/`
+  (updated in OOT-3). Branch policies, deployment, and release automation are
+  separate work.
 - Use shared AI.md guidance, an AGENTS.md entry point, portable specialised
   briefs under agents/, and SKILL.md definitions under .agents/skills/.
   Discovery is tool-dependent; explicit file loading is the supported fallback.
