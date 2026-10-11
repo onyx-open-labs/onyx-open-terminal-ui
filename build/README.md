@@ -8,3 +8,9 @@ reusable templates are needed.
 
 Solution validation now requires Windows with WinUI development tooling.
 The desktop host defaults to x64; use the solution x86 configuration for x86 builds.
+
+Full-suite command from the repository root (including GitHub Actions):
+`pwsh -NoProfile -File ./build/test.ps1`.
+It restores, builds Release, runs all solution tests, and returns the first
+failing command's non-zero exit code. No interactive steps are required.
+Tests use xUnit/VSTest and run as x64 on Windows; see the root README for setup.

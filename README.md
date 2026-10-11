@@ -25,6 +25,7 @@ The solution can be opened in a Visual Studio version supporting .NET 10.
 ## Structure
 
 - `src/Onyx.OpenTerminal.WinUI/`: unpackaged WinUI desktop application.
+- `tests/Onyx.OpenTerminal.WinUI.Tests/`: window configuration tests.
 - `docs/`: architecture, decisions, and agent workflows.
 - `build/`: restore/build/test automation.
 - `deploy/`: reserved deployment documentation.
@@ -52,10 +53,34 @@ Never push commits directly to these integration branches.
   remains framework-dependent. No MSIX registration is required.
 - Build the solution using the commands above (Any CPU maps the WinUI app to x64),
   or select x64/x86 explicitly in Visual Studio.
-- WinUI is the sole solution project and the debugging startup target. The shared
+- WinUI is the debugging startup target. The shared
   Onyx.OpenTerminal.slnLaunch profile starts it with debugging. Use the Unpackaged profile,
   or run dotnet run --project src/Onyx.OpenTerminal.WinUI.
 - CI uses a Windows agent because WinUI's XAML compiler requires Windows.
 
-The unused UI library and its scaffold test project have been removed. There are
-currently no automated test projects; validation consists of build and launch checks.
+## Automated tests
+
+Run the full suite from the repository root, locally or in a GitHub Actions
+Windows runner:
+
+```powershell
+pwsh -NoProfile -File ./build/test.ps1
+```
+
+This non-interactive command restores and builds the solution in Release, then
+runs every test project through VSTest. Restore, build, and test failures return
+a non-zero process exit code. Use the same Windows prerequisites listed above;
+GitHub Actions must install the SDK required by global.json before running it.
+The individual restore/build/test commands above are equivalent when each
+failure is checked by the caller. Do not use --no-build without first building.
+
+`tests/Onyx.OpenTerminal.WinUI.Tests/` uses xUnit and the Visual Studio test
+adapter with Microsoft.NET.Test.Sdk. It targets the application's Windows .NET
+10 framework and defaults to x64 (x86 follows the solution configuration). Its project reference tests the compiled desktop
+host's window type; a copied production XAML file verifies the declared title
+and centered welcome text. These tests do not activate a window or require an
+interactive desktop. They are configuration tests, not UI automation.
+
+For OOT-3, use a Windows runner and the full-suite command above. Further test
+projects added to the solution will be discovered by that command. The GitHub
+Actions workflow is tracked separately in OOT-3.
