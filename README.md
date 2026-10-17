@@ -16,6 +16,10 @@ after an approved merge into `main`; see deploy/PRODUCTION.md.
 
 Onyx Open Terminal UI WinUI desktop application.
 
+The application opens with an expanded left navigation pane and Home selected.
+Home displays the basic welcome page. The native pane toggle remains available;
+resizing the window does not automatically change the configured Left mode.
+
 Test installers are published as [GitHub pre-releases](https://github.com/onyx-open-labs/onyx-open-terminal-ui/releases)
 after successful develop-to-test promotion and x64/x86 installer smoke tests.
 Each pre-release includes installers, release notes, checksums and test evidence.

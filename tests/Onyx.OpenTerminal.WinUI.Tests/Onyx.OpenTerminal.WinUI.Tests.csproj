@@ -16,6 +16,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" PrivateAssets="all" />
     <ProjectReference Include="../../src/Onyx.OpenTerminal.WinUI/Onyx.OpenTerminal.WinUI.csproj" />
     <None Include="../../src/Onyx.OpenTerminal.WinUI/MainWindow.xaml" Link="MainWindow.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../src/Onyx.OpenTerminal.WinUI/Views/HomePage.xaml" Link="HomePage.xaml" CopyToOutputDirectory="PreserveNewest" />
     <Using Include="Xunit" />
   </ItemGroup>
 </Project>
