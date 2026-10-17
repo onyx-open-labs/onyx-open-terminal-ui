@@ -1,0 +1,22 @@
+<Page
+    x:Class="Onyx.OpenTerminal.WinUI.Views.TerminalPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Loaded="Page_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ProgressBar x:Name="LoadingIndicator" IsIndeterminate="False" Visibility="Collapsed"
+                     AutomationProperties.Name="Loading website" />
+        <InfoBar x:Name="NavigationError" Grid.Row="1" Severity="Error" IsOpen="False"
+                 IsClosable="False" Title="Unable to load website">
+            <InfoBar.ActionButton>
+                <Button Content="Retry" AutomationProperties.Name="Retry loading website" Click="Retry_Click" />
+            </InfoBar.ActionButton>
+        </InfoBar>
+        <Grid x:Name="BrowserHost" Grid.Row="2" />
+    </Grid>
+</Page>

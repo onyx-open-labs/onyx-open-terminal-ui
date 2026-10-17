@@ -1,0 +1,149 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onyx.OpenTerminal.WinUI", "src\Onyx.OpenTerminal.WinUI\Onyx.OpenTerminal.WinUI.csproj", "{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{62AA64A2-4B90-4BC6-8468-D286AD8CAF1C}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		LICENSE = LICENSE
+		AGENTS.md = AGENTS.md
+		AI.md = AI.md
+		Directory.Build.props = Directory.Build.props
+		global.json = global.json
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Onyx.OpenTerminal.slnLaunch = Onyx.OpenTerminal.slnLaunch
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{5DE59DD8-7610-4A7E-B5BA-D11199CF0639}"
+	ProjectSection(SolutionItems) = preProject
+		docs\ai-workflow.md = docs\ai-workflow.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "decisions", "decisions", "{801AF8BC-5FEE-4C00-BB26-EC788427F389}"
+	ProjectSection(SolutionItems) = preProject
+		docs\decisions\0001-repository-structure.md = docs\decisions\0001-repository-structure.md
+		docs\decisions\0002-winui-desktop-host.md = docs\decisions\0002-winui-desktop-host.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{0FF7C505-D9B7-48B0-8A76-8CEA4DF6ABE2}"
+	ProjectSection(SolutionItems) = preProject
+		build\README.md = build\README.md
+		build\build.ps1 = build\build.ps1
+		build\test.ps1 = build\test.ps1
+		build\test-installer.ps1 = build\test-installer.ps1
+		build\publish-test.ps1 = build\publish-test.ps1
+		build\promote-prod.ps1 = build\promote-prod.ps1
+		build\prepare-prod.ps1 = build\prepare-prod.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{F4033D27-CC22-41B0-8C6B-15F3B2DCE6C7}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\README.md = deploy\README.md
+		deploy\PRODUCTION.md = deploy\PRODUCTION.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "agents", "agents", "{DA93D472-8836-4BA9-BDFA-EE9F979CE27E}"
+	ProjectSection(SolutionItems) = preProject
+		agents\README.md = agents\README.md
+		agents\scaffold-reviewer.md = agents\scaffold-reviewer.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".agents", ".agents", "{CF99AE71-6BE5-4CD2-A8F7-7DA137DE73DB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "skills", "skills", "{B96685A4-63AF-4995-A0D5-421CB91EB441}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "repository-validation", "repository-validation", "{B03F5BC6-2AB6-4DF7-909B-5DB180CC9FFC}"
+	ProjectSection(SolutionItems) = preProject
+		.agents\skills\repository-validation\SKILL.md = .agents\skills\repository-validation\SKILL.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Onyx.OpenTerminal.WinUI.Tests", "tests\Onyx.OpenTerminal.WinUI.Tests\Onyx.OpenTerminal.WinUI.Tests.csproj", "{66E70FDE-9197-4488-9A23-F3980B47F748}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-test-project", "dotnet-test-project", "{6E3F815B-E063-40E5-86A8-E269361073D8}"
+	ProjectSection(SolutionItems) = preProject
+		.agents\skills\dotnet-test-project\SKILL.md = .agents\skills\dotnet-test-project\SKILL.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F6251F49-F4D4-4AB0-8E57-FA860688F0AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C0B2D381-C874-4195-A094-4DDE98E4A37E}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\develop-build-test.yml = .github\workflows\develop-build-test.yml
+		.github\workflows\test.yml = .github\workflows\test.yml
+		.github\workflows\prod.yml = .github\workflows\prod.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-develop-merge-action", "github-develop-merge-action", "{426D70F3-3DED-4E17-B58F-2A9EFB64842D}"
+	ProjectSection(SolutionItems) = preProject
+		.agents\skills\github-develop-merge-action\SKILL.md = .agents\skills\github-develop-merge-action\SKILL.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-test-merge-action", "github-test-merge-action", "{59368BD6-4766-43D8-9B6E-C1D40A159CB4}"
+	ProjectSection(SolutionItems) = preProject
+		.agents\skills\github-test-merge-action\SKILL.md = .agents\skills\github-test-merge-action\SKILL.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-pipeline-policy", "github-pipeline-policy", "{8F5B7235-4C09-4EF5-ABDA-B1516E01F934}"
+	ProjectSection(SolutionItems) = preProject
+		.agents\skills\github-pipeline-policy\SKILL.md = .agents\skills\github-pipeline-policy\SKILL.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Debug|Any CPU.Build.0 = Debug|x64
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Debug|x64.ActiveCfg = Debug|x64
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Debug|x64.Build.0 = Debug|x64
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Debug|x86.ActiveCfg = Debug|x86
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Debug|x86.Build.0 = Debug|x86
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Release|Any CPU.ActiveCfg = Release|x64
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Release|Any CPU.Build.0 = Release|x64
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Release|x64.ActiveCfg = Release|x64
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Release|x64.Build.0 = Release|x64
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Release|x86.ActiveCfg = Release|x86
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771}.Release|x86.Build.0 = Release|x86
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Debug|Any CPU.Build.0 = Debug|x64
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Debug|x64.ActiveCfg = Debug|x64
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Debug|x64.Build.0 = Debug|x64
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Debug|x86.ActiveCfg = Debug|x86
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Debug|x86.Build.0 = Debug|x86
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Release|Any CPU.ActiveCfg = Release|x64
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Release|Any CPU.Build.0 = Release|x64
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Release|x64.ActiveCfg = Release|x64
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Release|x64.Build.0 = Release|x64
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Release|x86.ActiveCfg = Release|x86
+		{66E70FDE-9197-4488-9A23-F3980B47F748}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8F5B7235-4C09-4EF5-ABDA-B1516E01F934} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
+		{59368BD6-4766-43D8-9B6E-C1D40A159CB4} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
+		{426D70F3-3DED-4E17-B58F-2A9EFB64842D} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
+		{C0B2D381-C874-4195-A094-4DDE98E4A37E} = {F6251F49-F4D4-4AB0-8E57-FA860688F0AC}
+		{6E3F815B-E063-40E5-86A8-E269361073D8} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
+		{DB85E4A8-9D2A-45D0-A59D-4AF4362BB771} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{801AF8BC-5FEE-4C00-BB26-EC788427F389} = {5DE59DD8-7610-4A7E-B5BA-D11199CF0639}
+		{B96685A4-63AF-4995-A0D5-421CB91EB441} = {CF99AE71-6BE5-4CD2-A8F7-7DA137DE73DB}
+		{B03F5BC6-2AB6-4DF7-909B-5DB180CC9FFC} = {B96685A4-63AF-4995-A0D5-421CB91EB441}
+		{66E70FDE-9197-4488-9A23-F3980B47F748} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+	EndGlobalSection
+EndGlobal

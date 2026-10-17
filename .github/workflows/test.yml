@@ -1,0 +1,152 @@
+name: test
+on:
+  pull_request:
+    branches: [test]
+    types: [closed]
+permissions:
+  contents: read
+jobs:
+  validate:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'develop' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Validate release preparation and failure guards
+        run: ./tests/ReleasePipeline/test-publish-test.ps1
+      - name: Validate production promotion failure guards
+        run: ./tests/ReleasePipeline/test-promote-prod.ps1
+      - run: dotnet restore Onyx.OpenTerminal.sln
+      - run: dotnet build Onyx.OpenTerminal.sln -c Release --no-restore
+      - run: dotnet test Onyx.OpenTerminal.sln -c Release --no-build --logger trx --results-directory TestResults
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: TestResults/*.trx
+          retention-days: 90
+          if-no-files-found: ignore
+  package:
+    needs: validate
+    runs-on: windows-2025
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x64, x86]
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Install installer compiler
+        run: |
+          ./build/install-compiler.ps1 -Destination "$env:RUNNER_TEMP/inno"
+      - name: Publish and package
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+          PREVIOUS_TEST_COMMIT: ${{ github.event.pull_request.base.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: ./build/package-test.ps1 -Architecture '${{ matrix.architecture }}' -BuildNumber $env:GITHUB_RUN_NUMBER -Attempt $env:GITHUB_RUN_ATTEMPT -Commit $env:SOURCE_COMMIT -PreviousTestCommit $env:PREVIOUS_TEST_COMMIT -RunUrl $env:RUN_URL -CompilerPath "$env:RUNNER_TEMP/inno/ISCC.exe"
+      - name: Upload candidate and tester handoff
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/test-${{ matrix.architecture }}/*
+          retention-days: 90
+          if-no-files-found: error
+  smoke:
+    name: Installer smoke test (${{ matrix.architecture }})
+    needs: package
+    runs-on: windows-2025
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [x64, x86]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: test-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: candidate
+      - name: Install, launch, verify version and uninstall
+        shell: pwsh
+        run: |
+          $installer = @(Get-ChildItem candidate/*-setup.exe)
+          if ($installer.Count -ne 1) { throw 'Expected exactly one candidate installer.' }
+          ./build/test-installer.ps1 -InstallerPath $installer[0].FullName -ReleaseMetadataPath candidate/release.json -EvidenceDirectory artifacts/smoke-${{ matrix.architecture }}
+      - name: Upload installer smoke evidence (including failures)
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: installer-smoke-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/smoke-${{ matrix.architecture }}/
+          retention-days: 90
+          if-no-files-found: error
+  release:
+    name: Publish GitHub test pre-release
+    needs: [validate, package, smoke]
+    runs-on: windows-2025
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: test-x64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/test-x64
+      - uses: actions/download-artifact@v7
+        with:
+          name: test-x86-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/test-x86
+      - uses: actions/download-artifact@v7
+        with:
+          name: installer-smoke-x64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/smoke-x64
+      - uses: actions/download-artifact@v7
+        with:
+          name: installer-smoke-x86-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/smoke-x86
+      - uses: actions/download-artifact@v7
+        with:
+          name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/unit-tests
+      - name: Verify evidence and publish pre-release with installers
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: ./build/publish-test.ps1 -ArtifactDirectory artifacts/release-input -OutputDirectory artifacts/release-output -Commit $env:SOURCE_COMMIT -Repository $env:RELEASE_REPOSITORY -RunUrl $env:RUN_URL
+      - name: Upload release preparation diagnostics
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: test-release-preparation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/release-output/release-notes.md
+            artifacts/release-output/release-plan.json
+            artifacts/release-output/SHA256SUMS.txt
+          retention-days: 90
+          if-no-files-found: ignore

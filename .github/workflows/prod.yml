@@ -1,0 +1,41 @@
+name: prod
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: prod-release
+  cancel-in-progress: false
+jobs:
+  promote:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'test' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: windows-2025
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - name: Promote validated test release without rebuilding
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+          SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+          TEST_COMMIT: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SIGNING_CERTIFICATE_SUBJECT: ${{ vars.SIGNING_CERTIFICATE_SUBJECT }}
+        run: ./build/promote-prod.ps1 -Repository $env:RELEASE_REPOSITORY -Commit $env:SOURCE_COMMIT -TestCommit $env:TEST_COMMIT -RunUrl $env:RUN_URL -OutputDirectory artifacts/prod
+      - name: Retain production artifacts and promotion evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: prod-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/prod/
+          retention-days: 90
+          if-no-files-found: ignore

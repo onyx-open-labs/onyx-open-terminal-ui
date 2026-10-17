@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <Company>Onyx Open Labs</Company>
+    <Product>Onyx Open Terminal</Product>
+    <Title>Onyx Open Terminal</Title>
+    <PackageProjectUrl>https://github.com/onyx-open-labs/onyx-open-terminal-ui</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/onyx-open-labs/onyx-open-terminal-ui</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\Onyx.ico</ApplicationIcon>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <Platforms>x64;x86</Platforms>
+    <Platform Condition="'$(Platform)' == '' Or '$(Platform)' == 'AnyCPU'">x64</Platform>
+    <RuntimeIdentifier Condition="'$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(Platform)' == 'x86'">win-x86</RuntimeIdentifier>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Assets\Onyx.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+  </ItemGroup>
+  <!-- WinUI copies these resources to build output, but does not include them in
+       this unpackaged project's dotnet publish output automatically. -->
+  <Target Name="PublishApplicationXamlResources" AfterTargets="ComputeFilesToPublish"
+          DependsOnTargets="Prep_ComputeProcessXamlFiles">
+    <ItemGroup>
+      <_ApplicationXamlResource Include="@(GeneratedXamlDest);$(TargetDir)$(AssemblyName).pri" />
+      <ResolvedFileToPublish Include="@(_ApplicationXamlResource)">
+        <RelativePath>$([MSBuild]::MakeRelative('$(TargetDir)', '%(_ApplicationXamlResource.FullPath)'))</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+    <Error Condition="!Exists('%(_ApplicationXamlResource.Identity)')"
+           Text="Required application XAML resource is missing: %(_ApplicationXamlResource.Identity)" />
+  </Target>
+</Project>
