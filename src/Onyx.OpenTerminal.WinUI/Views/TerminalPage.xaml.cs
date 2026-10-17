@@ -16,7 +16,15 @@ public sealed partial class TerminalPage : Page
     public bool CanGoBack => browser?.CoreWebView2?.CanGoBack == true;
     public bool CanGoForward => browser?.CoreWebView2?.CanGoForward == true;
 
-    public TerminalPage() => InitializeComponent();
+    public TerminalPage()
+    {
+        InitializeComponent();
+        // Visual Studio's design-time XAML stub can omit the generated connector
+        // assignments. Resolve the loaded names explicitly for that compilation too.
+        LoadingIndicator = (ProgressBar)FindName(nameof(LoadingIndicator));
+        NavigationError = (InfoBar)FindName(nameof(NavigationError));
+        BrowserHost = (Grid)FindName(nameof(BrowserHost));
+    }
 
     private async void Page_Loaded(object sender, RoutedEventArgs args)
     {
