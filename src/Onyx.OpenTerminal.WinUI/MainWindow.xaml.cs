@@ -15,7 +15,8 @@ public sealed partial class MainWindow : Window
             .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
             .Single().InformationalVersion.Split('+')[0];
         Title = $"Onyx Open Terminal {version}";
-        Navigation.SelectedItem = HomeNavigationItem;
+        var navigationView = (NavigationView)Content;
+        navigationView.SelectedItem = HomeNavigationItem;
     }
 
     private void Navigation_SelectionChanged(
