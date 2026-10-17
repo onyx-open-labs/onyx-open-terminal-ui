@@ -27,7 +27,7 @@ public sealed partial class MainWindow : Window
         NavigationView sender,
         NavigationViewSelectionChangedEventArgs args)
     {
-        if (args.SelectedItem == HomeNavigationItem)
+        if (ReferenceEquals(args.SelectedItem, HomeNavigationItem))
         {
             if (ContentFrame.CurrentSourcePageType != typeof(HomePage))
             {
