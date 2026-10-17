@@ -9,10 +9,6 @@ public sealed partial class MainWindow : Window
     private TerminalPage? terminalPage;
     private readonly TerminalSettings settings = new();
     private string? openedTerminalUrl;
-    private readonly ToolTip terminalConfigurationTip = new()
-    {
-        Content = "Configure a Terminal URL in Settings to enable Terminal View."
-    };
     public NavigationView NavigationView
     {
         get { return NavigationViewControl; }
@@ -28,22 +24,23 @@ public sealed partial class MainWindow : Window
             .Single().InformationalVersion.Split('+')[0];
         Title = $"Onyx Open Terminal {version}";
         settings.Changed += (_, _) => UpdateTerminalAvailability();
-        terminalConfigurationTip.PlacementTarget = TerminalNavigationItem;
+        TerminalConfigurationTip.PlacementTarget = TerminalNavigationItem;
         NavigationView.PointerMoved += (_, args) =>
         {
-            terminalConfigurationTip.XamlRoot = TerminalNavigationItem.XamlRoot;
+            if (!TerminalNavigationItem.IsLoaded || TerminalNavigationItem.XamlRoot is null) return;
+            TerminalConfigurationTip.XamlRoot = TerminalNavigationItem.XamlRoot;
             var position = args.GetCurrentPoint(TerminalNavigationItem).Position;
-            terminalConfigurationTip.IsOpen = !settings.IsConfigured &&
+            TerminalConfigurationTip.IsOpen = !settings.IsConfigured &&
                 position.X >= 0 && position.Y >= 0 &&
                 position.X <= TerminalNavigationItem.ActualWidth &&
                 position.Y <= TerminalNavigationItem.ActualHeight;
         };
-        NavigationView.PointerExited += (_, _) => terminalConfigurationTip.IsOpen = false;
+        NavigationView.PointerExited += (_, _) => TerminalConfigurationTip.IsOpen = false;
         UpdateTerminalAvailability();
         NavigationView.SelectedItem = HomeNavigationItem;
         Closed += (_, _) =>
         {
-            terminalConfigurationTip.IsOpen = false;
+            TerminalConfigurationTip.IsOpen = false;
             terminalPage?.Close();
         };
     }
@@ -95,7 +92,7 @@ public sealed partial class MainWindow : Window
     private void UpdateTerminalAvailability()
     {
         TerminalNavigationItem.IsEnabled = settings.IsConfigured;
-        terminalConfigurationTip.IsOpen = false;
+        TerminalConfigurationTip.IsOpen = false;
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetHelpText(TerminalNavigationItem,
             settings.IsConfigured ? string.Empty : "Configure a Terminal URL in Settings to enable Terminal View.");
 

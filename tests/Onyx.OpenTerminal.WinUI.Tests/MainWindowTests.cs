@@ -7,6 +7,24 @@ namespace Onyx.OpenTerminal.WinUI.Tests;
 public sealed class MainWindowTests
 {
     [Fact]
+    public void DisabledTerminalTooltipHasAnOwner()
+    {
+        var document = XDocument.Load(Path.Combine(AppContext.BaseDirectory, "MainWindow.xaml"));
+        XNamespace presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+        XNamespace xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
+        var terminal = document.Descendants(presentation + "NavigationViewItem")
+            .Single(item => (string?)item.Attribute(xaml + "Name") == "TerminalNavigationItem");
+        Assert.Equal("False", (string?)terminal.Attribute("IsEnabled"));
+        // PlacementTarget alone does not assign the owner required by ToolTip.IsOpen.
+        var ownership = terminal.Element(presentation + "ToolTipService.ToolTip");
+        Assert.NotNull(ownership);
+        var tooltip = Assert.Single(ownership.Elements(presentation + "ToolTip"));
+        Assert.Equal("TerminalConfigurationTip", (string?)tooltip.Attribute(xaml + "Name"));
+        Assert.Equal("Configure a Terminal URL in Settings to enable Terminal View.",
+            (string?)tooltip.Attribute("Content"));
+    }
+
+    [Fact]
     public void MainWindowIsAWinUIWindow()
     {
         Assert.True(typeof(Window).IsAssignableFrom(typeof(MainWindow)));

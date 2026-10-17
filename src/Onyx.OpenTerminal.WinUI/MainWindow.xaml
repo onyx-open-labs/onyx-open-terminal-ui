@@ -38,7 +38,12 @@
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
             <NavigationViewItem x:Name="TerminalNavigationItem" Content="Terminal View"
-                                AutomationProperties.Name="Terminal View" Icon="Globe" IsEnabled="False" />
+                                AutomationProperties.Name="Terminal View" Icon="Globe" IsEnabled="False">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Name="TerminalConfigurationTip"
+                             Content="Configure a Terminal URL in Settings to enable Terminal View." />
+                </ToolTipService.ToolTip>
+            </NavigationViewItem>
         </NavigationView.MenuItems>
         <Grid>
         <Frame x:Name="ContentFrame"
