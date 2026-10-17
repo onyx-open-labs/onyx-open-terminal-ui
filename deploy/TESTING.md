@@ -81,3 +81,14 @@ repository/organisation retention limit. Keep verified candidates available with
 that period; download archival copies before expiry if longer retention is needed.
 For rollback, back up user data, uninstall the candidate and reinstall the previous
 verified test release. Do not assume data migrated by a newer version supports downgrade.
+
+## Settings resize regression
+
+Open Settings with the navigation pane expanded. Snap the window to half and
+quarter desktop layouts, adjust the shared Snap divider, then restore and resize
+the floating window. Repeat with the navigation pane collapsed and at 100%, 150%
+and 200% display scaling. The card must fit the content area, with the URL editor
+stacked below the label at narrower widths. Save must remain visible and usable.
+Paste a long URL and confirm it scrolls inside the text box without widening the
+card. At a short window height, scroll to Save and its result message. Save a URL,
+reopen Settings, and confirm it was preserved.

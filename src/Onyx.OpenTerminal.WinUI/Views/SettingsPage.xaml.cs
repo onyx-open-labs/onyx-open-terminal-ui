@@ -10,6 +10,15 @@ public sealed partial class SettingsPage : Page
 
     public SettingsPage() => InitializeComponent();
 
+    private void SettingsViewport_SizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        // Use the available content viewport, including when Snap or the navigation pane changes it.
+        var availableWidth = Math.Max(0, args.NewSize.Width -
+            SettingsLayout.Margin.Left - SettingsLayout.Margin.Right);
+        SettingsLayout.Width = Math.Min(SettingsLayout.MaxWidth, availableWidth);
+        VisualStateManager.GoToState(this, availableWidth >= 900 ? "Wide" : "Compact", false);
+    }
+
     protected override void OnNavigatedTo(NavigationEventArgs args)
     {
         base.OnNavigatedTo(args);
