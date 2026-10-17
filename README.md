@@ -134,9 +134,12 @@ failure does not prevent the other jobs from running:
 ## Approval and pipeline names
 
 The pipelines are develop, test and prod; prod uses the main Git branch and is
-not yet configured. Require an approved PR before merging into each branch.
-Branch protection must enforce approvals (including administrators), dismiss stale
-approvals and block direct/force pushes. No Actions checks are required before
-merging because jobs run after the approved merge. PR creation, updates, approval
-alone and manual dispatch do not run pipeline jobs. Closing an unmerged PR may
+not yet configured. Chris reviews and manually merges each PR; this is the
+approval step for this solo-maintainer project. GitHub cannot accept an approving
+review from the PR author. Branch protection requires PRs, including for admins,
+with zero required approving reviews and no latest-push/code-owner approval.
+Direct/force pushes and branch deletion remain blocked. Do not use auto-merge.
+No Actions checks are required before merging because jobs run after the merge.
+PR creation, updates, review and manual dispatch do not run pipeline jobs.
+Closing an unmerged PR may
 create a skipped workflow entry; it executes no jobs. See AI.md for the policy.

@@ -7,9 +7,14 @@ description: Configure or verify approval enforcement, stage names and GitHub Ac
 
 Read AI.md pipeline approval policy before changing automation.
 Inspect every workflow and live branch protection, including automatic CodeQL setup.
-Require approved PR merges into develop/test/main, enforce rules for admins and
-dismiss stale approvals. Do not add pre-merge, manual, scheduled or unrestricted
-push runs. Reject stale required pre-merge checks that would deadlock merging.
+Require PRs into develop/test/main, including for admins. Use the solo-maintainer
+approval model: Chris reviews and manually merges his PR; that merge is approval.
+Set required_approving_review_count to 0 and require_last_push_approval and
+require_code_owner_reviews to false. Do not reintroduce independent-review
+requirements, enable auto-merge or merge on Chris's behalf without his explicit
+merge instruction. Keep direct/force pushes and branch deletion blocked.
+Do not add pre-merge, manual, scheduled or unrestricted push runs. Reject stale
+required pre-merge checks that would deadlock merging.
 Keep workflow names develop/test/prod; main is the prod Git branch.
 Use closed PR events with merged guards; explain skipped unmerged-closure entries.
 Pin all checkouts to the event merge commit. Preserve least-privilege permissions.
