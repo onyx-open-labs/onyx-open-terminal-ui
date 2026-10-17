@@ -45,6 +45,7 @@ function Record-Pass([string]$Check) {
 }
 
 try {
+    ./build/verify-signatures.ps1 -Path $installer -EvidencePath (Join-Path $evidence 'installer-signatures.json')
     # Refuse to alter an existing installation, including on a developer's machine.
     foreach ($path in $registrationPaths) {
         if (Test-Path -LiteralPath $path) { throw "Existing installation found at $path. Use a fresh runner/user for a clean-install smoke test." }
@@ -84,6 +85,8 @@ public static class InstallerSmokeWindow {
     foreach ($file in @('Onyx.OpenTerminal.WinUI.exe', 'Onyx.OpenTerminal.WinUI.pri', 'App.xbf', 'MainWindow.xbf', 'LICENSE', 'release.json')) {
         if (!(Test-Path -LiteralPath (Join-Path $installDirectory $file))) { throw "Installed file missing: $file" }
     }
+    ./build/verify-signatures.ps1 -Path @($executable, (Join-Path $installDirectory 'Onyx.OpenTerminal.WinUI.dll')) -EvidencePath (Join-Path $evidence 'application-signatures.json')
+    Record-Pass 'Trusted timestamped installer and application signatures'
     Record-Pass 'Silent installation and required application resources'
     $installedMetadata = Get-Content (Join-Path $installDirectory 'release.json') -Raw | ConvertFrom-Json
     foreach ($field in @('version', 'numericVersion', 'architecture', 'commit', 'organisation', 'licence')) {
@@ -152,3 +155,4 @@ public static class InstallerSmokeWindow {
     Stop-Transcript | Out-Null
 }
 if ($failure) { throw $failure }
+
