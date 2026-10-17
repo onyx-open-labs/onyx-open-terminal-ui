@@ -38,7 +38,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: develop-test-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: TestResults/**/*.trx
@@ -69,7 +69,7 @@ jobs:
           exit $LASTEXITCODE
       - name: Upload dependency report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: nuget-security-${{ github.run_id }}-${{ github.run_attempt }}
           path: nuget-vulnerabilities.json
@@ -101,7 +101,7 @@ jobs:
         run: '"$RUNNER_TEMP/gitleaks" git . --log-opts="HEAD" --redact=100 --report-format sarif --report-path gitleaks.sarif'
       - name: Upload redacted secret report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: gitleaks-security-${{ github.run_id }}-${{ github.run_attempt }}
           path: gitleaks.sarif
@@ -161,7 +161,7 @@ jobs:
           if ($findings -gt 0) { throw 'CodeQL reported findings requiring review.' }
       - name: Upload code security report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: codeql-security-${{ github.run_id }}-${{ github.run_attempt }}
           path: codeql-results/**/*.sarif
