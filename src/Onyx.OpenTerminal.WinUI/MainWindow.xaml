@@ -4,9 +4,54 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Onyx Open Terminal">
     <Grid>
-        <TextBlock Text="Onyx Open Terminal"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Style="{StaticResource TitleTextBlockStyle}" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Spacing="4" Margin="8,4">
+            <Button AutomationProperties.Name="Toggle navigation pane"
+                    ToolTipService.ToolTip="Toggle navigation pane"
+                    Click="TogglePane_Click">
+                <SymbolIcon Symbol="GlobalNavigationButton" />
+            </Button>
+            <Button x:Name="BackButton" Visibility="Collapsed" IsEnabled="False"
+                    AutomationProperties.Name="Back" ToolTipService.ToolTip="Back"
+                    Click="Back_Click"><SymbolIcon Symbol="Back" /></Button>
+            <Button x:Name="ForwardButton" Visibility="Collapsed" IsEnabled="False"
+                    AutomationProperties.Name="Forward" ToolTipService.ToolTip="Forward"
+                    Click="Forward_Click"><SymbolIcon Symbol="Forward" /></Button>
+        </StackPanel>
+    <NavigationView x:Name="NavigationViewControl" Grid.Row="1"
+                    PaneDisplayMode="Left"
+                    IsPaneOpen="True"
+                    IsSettingsVisible="True"
+                    IsBackButtonVisible="Collapsed"
+                    IsPaneToggleButtonVisible="False"
+                    Header="Home"
+                    SelectionChanged="Navigation_SelectionChanged">
+        <NavigationView.MenuItems>
+            <NavigationViewItem x:Name="HomeNavigationItem"
+                                Content="Home"
+                                AutomationProperties.Name="Home">
+                <NavigationViewItem.Icon>
+                    <SymbolIcon Symbol="Home" />
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem x:Name="TerminalNavigationItem" Content="Terminal View"
+                                AutomationProperties.Name="Terminal View" Icon="Globe" IsEnabled="False">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Name="TerminalConfigurationTip"
+                             Content="Configure a Terminal URL in Settings to enable Terminal View." />
+                </ToolTipService.ToolTip>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
+        <Grid>
+        <Frame x:Name="ContentFrame"
+               Margin="24"
+               IsNavigationStackEnabled="False" />
+            <ContentControl x:Name="TerminalHost" Visibility="Collapsed"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+        </Grid>
+    </NavigationView>
     </Grid>
 </Window>
