@@ -48,7 +48,10 @@ Do not require pre-merge Actions checks when Actions only run after merging.
 GitHub records the merge decision; it does not enforce a separate self-approval.
 Verify repository settings as well as YAML. Use the exact event merge commit
 for every checkout.
-The prod pipeline is not implemented; do not invent release behavior without requirements.
+The prod pipeline promotes validated signed test installers after test merges into
+main. Reuse passed test checks and exact artifacts. Require matching source trees,
+test evidence and OOT-11 signing gates. See deploy/PRODUCTION.md and the
+github-prod-merge-action skill.
 
 ## Agents and Skills
 
