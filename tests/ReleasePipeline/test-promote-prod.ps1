@@ -4,12 +4,6 @@ $fixture = Join-Path $root "artifacts/prod-tests-$([guid]::NewGuid().ToString('N
 New-Item -ItemType Directory -Force "$fixture/build", "$fixture/deploy", "$fixture/assets" | Out-Null
 Copy-Item "$root/build/promote-prod.ps1", "$root/build/prepare-prod.ps1" "$fixture/build"
 '{"version":"0.1.0"}' | Set-Content "$fixture/deploy/version.json"
-# Mock only the external signature trust boundary; production has no skip switch.
-@'
-param($Path,$EvidencePath)
-if ($global:rejectSignature) { throw 'Signature verification failed' }
-'[]' | Set-Content $EvidencePath
-'@ | Set-Content "$fixture/build/verify-signatures.ps1"
 $global:prodFixture = $fixture
 $global:prodMain = 'a' * 40
 $global:prodTest = 'b' * 40
@@ -17,7 +11,7 @@ $global:prodHead = 'c' * 40
 $global:prodMode = ''
 $global:prodCalls = @()
 $originalSubject = $env:SIGNING_CERTIFICATE_SUBJECT
-$env:SIGNING_CERTIFICATE_SUBJECT = 'CN=Fixture publisher'
+$env:SIGNING_CERTIFICATE_SUBJECT = ''
 $candidate = '0.1.0-test.42.1'
 $testUrl = 'https://github.com/owner/repo/actions/runs/42'
 foreach ($arch in @('x64','x86')) {
@@ -26,14 +20,9 @@ foreach ($arch in @('x64','x86')) {
     New-Item -ItemType Directory -Force $candidateDir, $smokeDir | Out-Null
     $installerName = "OnyxOpenTerminal-$candidate-$arch-setup.exe"
     'validated bytes' | Set-Content "$fixture/assets/$installerName"
-    $hash = (Get-FileHash "$fixture/assets/$installerName").Hash
     @{version=$candidate;commit=$global:prodTest;architecture=$arch;workflow=$testUrl;
       product='Onyx Open Terminal';organisation='Onyx Open Labs';licence='MIT'} | ConvertTo-Json | Set-Content "$candidateDir/release.json"
     @{status='PASS';version=$candidate;commit=$global:prodTest;architecture=$arch} | ConvertTo-Json | Set-Content "$smokeDir/result.json"
-    @(@{sha256=$hash}) | ConvertTo-Json -AsArray | Set-Content "$smokeDir/installer-signatures.json"
-    @('Onyx.OpenTerminal.WinUI.exe','Onyx.OpenTerminal.WinUI.dll') | ForEach-Object {
-        @{file=$_;passed=$true;status='Valid';subject=$env:SIGNING_CERTIFICATE_SUBJECT;timestamped=$true}
-    } | ConvertTo-Json -AsArray | Set-Content "$smokeDir/application-signatures.json"
     Compress-Archive -Path $candidateDir,$smokeDir -DestinationPath "$fixture/assets/OnyxOpenTerminal-$candidate-$arch-evidence.zip"
 }
 'test reports' | Set-Content "$fixture/report.trx"
@@ -60,24 +49,21 @@ function global:gh {
         $destination = $args[([array]::IndexOf($args,'--dir') + 1)]
         Copy-Item "$global:prodFixture/assets/*" $destination
         if ($global:prodMode -eq 'tampered-asset') { Add-Content "$destination/OnyxOpenTerminal-0.1.0-test.42.1-x64-setup.exe" 'changed' }
-        if ($global:prodMode -in @('failed-smoke','wrong-identity','missing-app-signatures')) {
+        if ($global:prodMode -in @('failed-smoke','wrong-identity')) {
             $archive = "$destination/OnyxOpenTerminal-0.1.0-test.42.1-x64-evidence.zip"
             $zip = [IO.Compression.ZipFile]::Open($archive, [IO.Compression.ZipArchiveMode]::Update)
             try {
                 $name = switch ($global:prodMode) {
                     'failed-smoke' { 'smoke-x64/result.json' }
                     'wrong-identity' { 'test-x64/release.json' }
-                    'missing-app-signatures' { 'smoke-x64/application-signatures.json' }
                 }
                 $entry = $zip.GetEntry($name)
                 $reader = [IO.StreamReader]::new($entry.Open())
                 try { $value = $reader.ReadToEnd() | ConvertFrom-Json } finally { $reader.Dispose() }
                 $entry.Delete()
-                if ($global:prodMode -ne 'missing-app-signatures') {
-                    if ($global:prodMode -eq 'failed-smoke') { $value.status = 'FAIL' } else { $value.commit = 'd' * 40 }
-                    $writer = [IO.StreamWriter]::new($zip.CreateEntry($name).Open())
-                    try { $writer.Write(($value | ConvertTo-Json)) } finally { $writer.Dispose() }
-                }
+                if ($global:prodMode -eq 'failed-smoke') { $value.status = 'FAIL' } else { $value.commit = 'd' * 40 }
+                $writer = [IO.StreamWriter]::new($zip.CreateEntry($name).Open())
+                try { $writer.Write(($value | ConvertTo-Json)) } finally { $writer.Dispose() }
             } finally { $zip.Dispose() }
             Get-ChildItem $destination | Where-Object Name -ne 'SHA256SUMS.txt' | ForEach-Object {
                 "$((Get-FileHash $_.FullName).Hash)  $($_.Name)"
@@ -91,22 +77,21 @@ try {
     & "$fixture/build/promote-prod.ps1" @arguments -OutputDirectory "$fixture/valid"
     $plan = Get-Content "$fixture/valid/promotion.json" -Raw | ConvertFrom-Json
     if ($plan.commit -ne $global:prodMain -or $plan.testCommit -ne $global:prodTest -or $plan.candidateVersion -ne $candidate) { throw 'Lost promotion provenance.' }
+    if (@($plan.assets | Where-Object { !(Test-Path (Join-Path "$fixture/valid" $_)) }).Count) { throw 'Promotion references missing assets.' }
+    if ((Get-Content "$fixture/valid/release-notes.md" -Raw) -notmatch 'unsigned installers') { throw 'Unsigned release disclosure missing.' }
     if ((Get-FileHash "$fixture/valid/OnyxOpenTerminal-$candidate-x64-setup.exe").Hash -ne (Get-FileHash "$fixture/assets/OnyxOpenTerminal-$candidate-x64-setup.exe").Hash) { throw 'Promotion changed installer bytes.' }
     $create = @($global:prodCalls | Where-Object { $_[1] -eq 'create' })
     $edit = @($global:prodCalls | Where-Object { $_[1] -eq 'edit' })
     if ($create.Count -ne 1 -or '--draft' -notin $create[0] -or $edit.Count -ne 1 -or '--prerelease=false' -notin $edit[0]) { throw 'Draft-first production publication failed.' }
-    Write-Host 'PASS: Equivalent merge trees, matching test run, byte-identical promotion and draft-first publication'
+    Write-Host 'PASS: Unsigned installers without signing configuration/evidence, matching test run, byte-identical promotion and draft-first publication'
     $cases = @{
         'changed-source'='source differs'; 'failed-run'='No successful'; 'skipped-job'='Required test job';
         'wrong-tag'='validated test commit'; 'tampered-asset'='checksum mismatch'; 'existing-tag'='tag already exists';
-        'upload-failure'='draft creation/upload failed'; 'unsigned'='Signature verification failed';
-        'missing-subject'='SIGNING_CERTIFICATE_SUBJECT'; 'missing-signing-helper'='signing verification must be merged'
-        'failed-smoke'='Passing smoke evidence'; 'wrong-identity'='identity mismatch'; 'missing-app-signatures'='Missing or duplicate evidence'
+        'upload-failure'='draft creation/upload failed';
+        'failed-smoke'='Passing smoke evidence'; 'wrong-identity'='identity mismatch'
     }
     foreach ($mode in $cases.Keys) {
-        $global:prodMode = $mode; $global:prodCalls = @(); $global:rejectSignature = $mode -eq 'unsigned'
-        if ($mode -eq 'missing-subject') { $env:SIGNING_CERTIFICATE_SUBJECT = '' }
-        if ($mode -eq 'missing-signing-helper') { Move-Item "$fixture/build/verify-signatures.ps1" "$fixture/build/verify-signatures.hidden" }
+        $global:prodMode = $mode; $global:prodCalls = @()
         $caught = $false
         try { & "$fixture/build/promote-prod.ps1" @arguments -OutputDirectory "$fixture/$mode" } catch {
             if ($_.Exception.Message -notmatch $cases[$mode]) { throw }
@@ -114,13 +99,11 @@ try {
         }
         if (!$caught) { throw "Unsafe promotion accepted: $mode" }
         if (@($global:prodCalls | Where-Object { $_[1] -eq 'edit' }).Count) { throw "Published after failed gate: $mode" }
-        $env:SIGNING_CERTIFICATE_SUBJECT = 'CN=Fixture publisher'
-        if ($mode -eq 'missing-signing-helper') { Move-Item "$fixture/build/verify-signatures.hidden" "$fixture/build/verify-signatures.ps1" }
         Write-Host "PASS: Rejected $mode without publication"
     }
 } finally {
     Remove-Item Function:\gh
     $env:SIGNING_CERTIFICATE_SUBJECT = $originalSubject
-    Remove-Variable prodFixture,prodMain,prodTest,prodHead,prodMode,prodCalls,rejectSignature -Scope Global -ErrorAction SilentlyContinue
+    Remove-Variable prodFixture,prodMain,prodTest,prodHead,prodMode,prodCalls -Scope Global -ErrorAction SilentlyContinue
     $global:LASTEXITCODE = 0
 }

@@ -34,4 +34,4 @@ Verify branch approval settings through authenticated GitHub APIs, then check
 positive merge and negative push/open/update/manual/unmerged-close scenarios.
 Do not claim a settings change or hosted execution without inspecting its result.
 Route prod promotion to github-prod-merge-action. Preserve test evidence reuse
-and OOT-11 signing gates; do not duplicate passed checks or bypass missing evidence.
+and checksum gates; do not duplicate passed checks or bypass missing evidence.

@@ -1,6 +1,6 @@
 # Onyx Open Terminal UI
 
-Production promotes validated signed test installers without repeating passed
+Production promotes validated unsigned test installers without repeating passed
 checks. See [production promotion](deploy/PRODUCTION.md).
 
 [![develop pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/develop-build-test.yml?event=pull_request&label=develop)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/develop-build-test.yml)
@@ -11,7 +11,7 @@ Badges show the latest result of each branch's dedicated integration workflow.
 The `test` badge reports automated testing, packaging, installer smoke tests and
 pre-release publishing; manual clean-machine and upgrade verification is recorded
 separately. Until its first run, a workflow
-badge may show no status. The `prod` pipeline promotes validated signed test artifacts
+badge may show no status. The `prod` pipeline promotes validated unsigned test artifacts
 after an approved merge into `main`; see deploy/PRODUCTION.md.
 
 Onyx Open Terminal is a Windows desktop application built with WinUI and an
