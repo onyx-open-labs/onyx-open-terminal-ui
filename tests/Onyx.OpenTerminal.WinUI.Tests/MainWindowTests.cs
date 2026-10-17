@@ -26,7 +26,7 @@ public sealed class MainWindowTests
         var navigation = Assert.Single(window.Descendants(presentation + "NavigationView"));
         Assert.Equal("Left", (string?)navigation.Attribute("PaneDisplayMode"));
         Assert.Equal("True", (string?)navigation.Attribute("IsPaneOpen"));
-        Assert.Equal("False", (string?)navigation.Attribute("IsSettingsVisible"));
+        Assert.Equal("True", (string?)navigation.Attribute("IsSettingsVisible"));
         var items = navigation.Element(presentation + "NavigationView.MenuItems")!;
         var home = items.Elements().First();
         Assert.Equal("Home", (string?)home.Attribute("Content"));

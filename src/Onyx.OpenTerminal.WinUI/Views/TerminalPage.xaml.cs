@@ -9,15 +9,18 @@ public sealed partial class TerminalPage : Page
     private WebView2? browser;
     private bool initializing;
     private bool closed;
-    private string retryAddress = "https://www.google.com/";
+    private string retryAddress;
     private ulong navigationId;
 
     public event EventHandler? HistoryChanged;
     public bool CanGoBack => browser?.CoreWebView2?.CanGoBack == true;
     public bool CanGoForward => browser?.CoreWebView2?.CanGoForward == true;
 
-    public TerminalPage()
+    public TerminalPage(string terminalUrl)
     {
+        if (!BrowserNavigation.IsWebAddress(terminalUrl))
+            throw new ArgumentException("A configured HTTP or HTTPS Terminal URL is required.", nameof(terminalUrl));
+        retryAddress = terminalUrl;
         InitializeComponent();
         // Visual Studio's design-time XAML stub can omit the generated connector
         // assignments. Resolve the loaded names explicitly for that compilation too.

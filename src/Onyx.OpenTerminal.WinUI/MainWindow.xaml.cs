@@ -7,6 +7,12 @@ namespace Onyx.OpenTerminal.WinUI;
 public sealed partial class MainWindow : Window
 {
     private TerminalPage? terminalPage;
+    private readonly TerminalSettings settings = new();
+    private string? openedTerminalUrl;
+    private readonly ToolTip terminalConfigurationTip = new()
+    {
+        Content = "Configure a Terminal URL in Settings to enable Terminal View."
+    };
     public NavigationView NavigationView
     {
         get { return NavigationViewControl; }
@@ -21,8 +27,25 @@ public sealed partial class MainWindow : Window
             .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
             .Single().InformationalVersion.Split('+')[0];
         Title = $"Onyx Open Terminal {version}";
+        settings.Changed += (_, _) => UpdateTerminalAvailability();
+        terminalConfigurationTip.PlacementTarget = TerminalNavigationItem;
+        NavigationView.PointerMoved += (_, args) =>
+        {
+            terminalConfigurationTip.XamlRoot = TerminalNavigationItem.XamlRoot;
+            var position = args.GetCurrentPoint(TerminalNavigationItem).Position;
+            terminalConfigurationTip.IsOpen = !settings.IsConfigured &&
+                position.X >= 0 && position.Y >= 0 &&
+                position.X <= TerminalNavigationItem.ActualWidth &&
+                position.Y <= TerminalNavigationItem.ActualHeight;
+        };
+        NavigationView.PointerExited += (_, _) => terminalConfigurationTip.IsOpen = false;
+        UpdateTerminalAvailability();
         NavigationView.SelectedItem = HomeNavigationItem;
-        Closed += (_, _) => terminalPage?.Close();
+        Closed += (_, _) =>
+        {
+            terminalConfigurationTip.IsOpen = false;
+            terminalPage?.Close();
+        };
     }
 
     private void Navigation_SelectionChanged(
@@ -30,6 +53,11 @@ public sealed partial class MainWindow : Window
         NavigationViewSelectionChangedEventArgs args)
     {
         var isTerminal = ReferenceEquals(args.SelectedItem, TerminalNavigationItem);
+        if (isTerminal && !settings.IsConfigured)
+        {
+            sender.SelectedItem = HomeNavigationItem;
+            return;
+        }
         ContentFrame.Visibility = isTerminal ? Visibility.Collapsed : Visibility.Visible;
         TerminalHost.Visibility = isTerminal ? Visibility.Visible : Visibility.Collapsed;
         BackButton.Visibility = ForwardButton.Visibility =
@@ -37,14 +65,21 @@ public sealed partial class MainWindow : Window
         sender.AlwaysShowHeader = !isTerminal;
         if (isTerminal)
         {
-            if (terminalPage is null)
+            if (terminalPage is null || openedTerminalUrl != settings.TerminalUrl)
             {
-                terminalPage = new TerminalPage();
+                terminalPage?.Close();
+                openedTerminalUrl = settings.TerminalUrl;
+                terminalPage = new TerminalPage(settings.TerminalUrl);
                 terminalPage.HistoryChanged += (_, _) => UpdateHistoryButtons();
                 TerminalHost.Content = terminalPage;
             }
             sender.Header = null;
             UpdateHistoryButtons();
+        }
+        else if (args.IsSettingsSelected)
+        {
+            ContentFrame.Navigate(typeof(SettingsPage), settings);
+            sender.Header = "Settings";
         }
         else if (ReferenceEquals(args.SelectedItem, HomeNavigationItem))
         {
@@ -54,6 +89,22 @@ public sealed partial class MainWindow : Window
             }
 
             sender.Header = "Home";
+        }
+    }
+
+    private void UpdateTerminalAvailability()
+    {
+        TerminalNavigationItem.IsEnabled = settings.IsConfigured;
+        terminalConfigurationTip.IsOpen = false;
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetHelpText(TerminalNavigationItem,
+            settings.IsConfigured ? string.Empty : "Configure a Terminal URL in Settings to enable Terminal View.");
+
+        if (!settings.IsConfigured && terminalPage is not null)
+        {
+            terminalPage.Close();
+            terminalPage = null;
+            TerminalHost.Content = null;
+            openedTerminalUrl = null;
         }
     }
 
