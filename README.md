@@ -17,8 +17,13 @@ after an approved merge into `main`; see deploy/PRODUCTION.md.
 Onyx Open Terminal UI WinUI desktop application.
 
 The application opens with an expanded left navigation pane and Home selected.
-Home displays the basic welcome page. The native pane toggle remains available;
+Home displays the basic welcome page. The navigation pane toggle remains available;
 resizing the window does not automatically change the configured Left mode.
+
+Terminal Session opens Google in an embedded WebView with Back/Forward controls,
+loading feedback and Retry on failure. All web links stay inside the application.
+The current page and history survive switching to Home and back. Microsoft Edge
+WebView2 Runtime is required. See [behavior and manual checks](docs/terminal-session-validation.md).
 
 Test installers are published as [GitHub pre-releases](https://github.com/onyx-open-labs/onyx-open-terminal-ui/releases)
 after successful develop-to-test promotion and x64/x86 installer smoke tests.
