@@ -67,7 +67,7 @@ $assets.Add($checksums)
 $changes = Get-Content -LiteralPath (Join-Path $candidates.x64.directory 'CHANGES.txt') -Raw
 $knownIssues = Get-Content -LiteralPath (Join-Path $candidates.x64.directory 'KNOWN-ISSUES.md') -Raw
 $notes = @"
-Onyx Open Terminal $version — test pre-release
+Onyx Open Terminal $version - test pre-release
 
 Organisation: Onyx Open Labs. Licence: MIT.
 Source commit: $Commit
@@ -76,7 +76,7 @@ Build and test evidence: $RunUrl
 ## Downloads
 
 Choose the x64 or x86 setup executable. Installation is per-user and includes
-the .NET and Windows App SDK runtimes. Installers are unsigned.
+the .NET and Windows App SDK runtimes. Installers and the installed application require trusted, timestamped signatures.
 The matching evidence ZIP contains release identity, testing instructions,
 known issues, the pending manual verification record, and installer smoke logs.
 SHA256SUMS.txt contains checksums for the installers and evidence archives.
@@ -117,3 +117,4 @@ $assetPaths = $assets.ToArray()
 & gh release create $tag @assetPaths --repo $Repository --target $Commit --title "Onyx Open Terminal $version" --notes-file $notesPath --prerelease --latest=false
 if ($LASTEXITCODE) { throw "GitHub pre-release publication failed: $LASTEXITCODE" }
 Write-Host "Published https://github.com/$Repository/releases/tag/$tag"
+
