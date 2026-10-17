@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
+      - name: Validate signing failure guards
+        run: ./tests/ReleasePipeline/test-signatures.ps1
       - name: Validate release preparation and failure guards
         run: ./tests/ReleasePipeline/test-publish-test.ps1
       - run: dotnet restore Onyx.OpenTerminal.sln
@@ -34,6 +36,11 @@ jobs:
           if-no-files-found: ignore
   package:
     needs: validate
+    permissions:
+      contents: read
+      actions: read
+    env:
+      SIGNING_CERTIFICATE_SUBJECT: ${{ vars.SIGNING_CERTIFICATE_SUBJECT }}
     runs-on: windows-2025
     timeout-minutes: 30
     strategy:
@@ -51,15 +58,74 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
+      - name: Require signing configuration
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+        run: |
+          foreach ($name in @('SIGNPATH_API_TOKEN','SIGNPATH_ORGANIZATION_ID','SIGNPATH_PROJECT_SLUG','SIGNPATH_SIGNING_POLICY_SLUG','SIGNING_CERTIFICATE_SUBJECT')) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) { throw "Missing $name. Complete deploy/CODE-SIGNING.md; unsigned releases are blocked." }
+          }
       - name: Install installer compiler
         run: |
           ./build/install-compiler.ps1 -Destination "$env:RUNNER_TEMP/inno"
-      - name: Publish and package
+      - name: Publish application for signing
         env:
           SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
           PREVIOUS_TEST_COMMIT: ${{ github.event.pull_request.base.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: ./build/package-test.ps1 -Architecture '${{ matrix.architecture }}' -BuildNumber $env:GITHUB_RUN_NUMBER -Attempt $env:GITHUB_RUN_ATTEMPT -Commit $env:SOURCE_COMMIT -PreviousTestCommit $env:PREVIOUS_TEST_COMMIT -RunUrl $env:RUN_URL -CompilerPath "$env:RUNNER_TEMP/inno/ISCC.exe"
+        run: ./build/package-test.ps1 -Phase Publish -Architecture '${{ matrix.architecture }}' -BuildNumber $env:GITHUB_RUN_NUMBER -Attempt $env:GITHUB_RUN_ATTEMPT -Commit $env:SOURCE_COMMIT -PreviousTestCommit $env:PREVIOUS_TEST_COMMIT -RunUrl $env:RUN_URL -CompilerPath "$env:RUNNER_TEMP/inno/ISCC.exe"
+      - name: Upload unsigned application
+        id: unsigned-application
+        uses: actions/upload-artifact@v6
+        with:
+          name: unsigned-application-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/publish-${{ matrix.architecture }}/Onyx.OpenTerminal.WinUI.*
+          retention-days: 1
+          if-no-files-found: error
+      - name: Sign application
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: application
+          github-artifact-id: ${{ steps.unsigned-application.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: artifacts/publish-${{ matrix.architecture }}
+      - name: Package signed application
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+          PREVIOUS_TEST_COMMIT: ${{ github.event.pull_request.base.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: ./build/package-test.ps1 -Phase Package -Architecture '${{ matrix.architecture }}' -BuildNumber $env:GITHUB_RUN_NUMBER -Attempt $env:GITHUB_RUN_ATTEMPT -Commit $env:SOURCE_COMMIT -PreviousTestCommit $env:PREVIOUS_TEST_COMMIT -RunUrl $env:RUN_URL -CompilerPath "$env:RUNNER_TEMP/inno/ISCC.exe"
+      - name: Upload unsigned installer
+        id: unsigned-installer
+        uses: actions/upload-artifact@v6
+        with:
+          name: unsigned-installer-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/test-${{ matrix.architecture }}/*-setup.exe
+          retention-days: 1
+          if-no-files-found: error
+      - name: Sign installer
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: artifacts/test-${{ matrix.architecture }}
+      - name: Verify signed installer
+        run: |
+          $installer = @(Get-ChildItem artifacts/test-${{ matrix.architecture }}/*-setup.exe)
+          if ($installer.Count -ne 1) { throw 'Expected exactly one signed installer.' }
+          ./build/verify-signatures.ps1 -Path $installer[0].FullName -EvidencePath artifacts/test-${{ matrix.architecture }}/installer-signatures.json
       - name: Upload candidate and tester handoff
         uses: actions/upload-artifact@v6
         with:
@@ -69,6 +135,8 @@ jobs:
           if-no-files-found: error
   smoke:
     name: Installer smoke test (${{ matrix.architecture }})
+    env:
+      SIGNING_CERTIFICATE_SUBJECT: ${{ vars.SIGNING_CERTIFICATE_SUBJECT }}
     needs: package
     runs-on: windows-2025
     timeout-minutes: 15
@@ -148,3 +216,4 @@ jobs:
             artifacts/release-output/SHA256SUMS.txt
           retention-days: 90
           if-no-files-found: ignore
+
