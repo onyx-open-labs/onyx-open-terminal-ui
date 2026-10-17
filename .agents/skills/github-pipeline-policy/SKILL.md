@@ -5,6 +5,16 @@ description: Configure or verify approval enforcement, stage names and GitHub Ac
 
 # GitHub Pipeline Policy
 
+OOT-14 permits the develop workflow to scan pushes restricted to the default
+branch main. Only code-security runs on these pushes; all other jobs retain
+merged-develop-PR guards. CodeQL checks out the exact push github.sha or PR
+merge_commit_sha and uploads against github.ref or refs/heads/develop,
+respectively. Keep category develop-csharp on both branches for comparison.
+This exception supersedes general merge-only and checkout rules.
+No push triggers are permitted for test or prod; preserve branch protection.
+
+
+
 Read AI.md pipeline approval policy before changing automation.
 Inspect every workflow and live branch protection, including automatic CodeQL setup.
 Require PRs into develop/test/main, including for admins. Use the solo-maintainer
