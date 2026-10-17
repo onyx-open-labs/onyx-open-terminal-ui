@@ -1,6 +1,8 @@
 name: develop
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [develop]
     types: [closed]
@@ -108,7 +110,10 @@ jobs:
           if-no-files-found: ignore
 
   code-security:
-    if: github.event.pull_request.merged == true
+    # OOT-14: only CodeQL runs on default-branch pushes.
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: windows-2025
     timeout-minutes: 45
     permissions:
@@ -118,10 +123,10 @@ jobs:
       run:
         shell: pwsh
     steps:
-      - name: Check out merged develop commit
+      - name: Check out exact commit for code scanning
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
       - name: Record scanned commit
         id: revision
         run: '"sha=$(git rev-parse HEAD)" >> $env:GITHUB_OUTPUT'
@@ -144,7 +149,7 @@ jobs:
         with:
           output: codeql-results
           category: develop-csharp
-          ref: refs/heads/develop
+          ref: ${{ github.event_name == 'push' && github.ref || 'refs/heads/develop' }}
           sha: ${{ steps.revision.outputs.sha }}
       - name: Fail on CodeQL findings
         run: |

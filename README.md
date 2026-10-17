@@ -114,6 +114,19 @@ interactive desktop. They are configuration tests, not UI automation.
 targeting `develop`. Its build-and-test job runs only when the PR was merged;
 closing without merging produces a skipped job and executes no build or tests.
 PRs targeting other branches do not start this workflow.
+OOT-14 additionally enables pushes to the default branch main for code-security
+only. Build/test, NuGet Audit and Gitleaks remain merged-develop-PR jobs.
+CodeQL checks out the exact pushed SHA and uploads against refs/heads/main;
+develop scans retain their merge SHA and refs/heads/develop. Both branches use
+category develop-csharp so GitHub can compare analyses.
+See [GitHub's push scan documentation](https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options#scanning-on-push).
+
+After promoting this change through develop and test into main, inspect the
+push-triggered develop run. Only code-security should run; confirm the scanned
+SHA matches the main push and the missing on.push warning is absent. Confirm
+the main analysis in Security > Code scanning (a clean scan may have no alerts).
+Also verify all four jobs on the next merged develop PR. Hosted verification
+requires this workflow to exist on main.
 
 The Windows runner checks out the event's exact merged commit, installs the SDK
 from `global.json`, restores dependencies, builds Release, and runs every test

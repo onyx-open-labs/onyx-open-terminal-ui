@@ -36,7 +36,15 @@ Name pipelines `develop`, `test` and `prod`; the production Git branch is `main`
 Run GitHub Actions jobs only after Chris reviews and manually merges the PR.
 For this solo-maintainer project, that manual merge is the approval decision;
 GitHub does not allow authors to submit approving reviews on their own PRs.
-Do not add push, PR-open/update/review, schedule or manual-dispatch triggers.
+OOT-14 permits the develop workflow to scan pushes restricted to the default
+branch main. Only code-security runs on these pushes; all other jobs retain
+merged-develop-PR guards. CodeQL checks out the exact push github.sha or PR
+merge_commit_sha and uploads against github.ref or refs/heads/develop,
+respectively. Keep category develop-csharp on both branches for comparison.
+This exception supersedes general merge-only and checkout rules.
+No push triggers are permitted for test or prod; preserve branch protection.
+
+Do not add other push, PR-open/update/review, schedule or manual-dispatch triggers.
 Use `pull_request`, `types: [closed]`, a target branch filter and merged job guards.
 An unmerged closure may create a skipped workflow entry but must execute no jobs.
 Require a PR through branch protection on develop/test/main, including for admins.
@@ -47,7 +55,7 @@ or merge a PR on Chris's behalf without his explicit merge instruction.
 Do not require pre-merge Actions checks when Actions only run after merging.
 GitHub records the merge decision; it does not enforce a separate self-approval.
 Verify repository settings as well as YAML. Use the exact event merge commit
-for every checkout.
+for every PR checkout; use the exact push SHA for the CodeQL exception.
 The prod pipeline promotes validated signed test installers after test merges into
 main. Reuse passed test checks and exact artifacts. Require matching source trees,
 test evidence and OOT-11 signing gates. See deploy/PRODUCTION.md and the
