@@ -1,7 +1,7 @@
 # Build Automation
 
 `promote-prod.ps1` resolves the successful test run and matching source trees.
-`prepare-prod.ps1` verifies downloaded release identity, checksums and signing
+`prepare-prod.ps1` verifies downloaded release identity, checksums and smoke-test
 evidence without rebuilding. See deploy/PRODUCTION.md. Run
 tests/ReleasePipeline/test-promote-prod.ps1 for offline failure-guard tests.
 
