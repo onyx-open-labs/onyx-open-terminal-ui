@@ -1,27 +1,28 @@
 ---
 name: github-test-merge-action
-description: Create, repair, or review this project's GitHub Actions workflow after develop merges into test, including exact-commit validation, beta installer packaging, installer smoke tests and GitHub pre-releases. Use for test promotion and shared installer/release helpers, not develop security scans or PR event configuration.
+description: Create, repair, or review this project's GitHub Actions workflow after develop merges into test, including exact-commit validation, test installer packaging, installer smoke tests and GitHub pre-releases. Use for test promotion and shared installer/release helpers, not develop security scans or PR event configuration.
 ---
 
 # GitHub Test Merge Action
 
 ## Responsibility and entry points
 
-Own `.github/workflows/test-beta.yml` and its promotion jobs. Shared installer
-and release mechanics live in `build/package-beta.ps1`, `build/install-compiler.ps1`,
-`build/test-installer.ps1`, `build/publish-beta.ps1`, `deploy/installer.iss` and
+Own `.github/workflows/test.yml` and its promotion jobs. Shared installer
+and release mechanics live in `build/package-test.ps1`, `build/install-compiler.ps1`,
+`build/test-installer.ps1`, `build/publish-test.ps1`, `deploy/installer.iss` and
 `deploy/version.json`. Release failure-guard tests live in
-`tests/ReleasePipeline/test-publish-beta.ps1`; tester procedures and evidence
-requirements live in `deploy/BETA-TESTING.md` and `deploy/test-results-template.md`.
+`tests/ReleasePipeline/test-publish-test.ps1`; tester procedures and evidence
+requirements live in `deploy/TESTING.md` and `deploy/test-results-template.md`.
 Reuse these sources rather than duplicating their procedures in another workflow.
 
 Use [github-develop-merge-action](../github-develop-merge-action/SKILL.md) for
 develop build/security integration and
-[github-installer-pr-action](../github-installer-pr-action/SKILL.md) for
-`.github/workflows/installer-smoke.yml` event/job orchestration. A shared helper
-change can require PR-path/caller updates, but does not justify duplicating its
-implementation. Use [repository-validation](../repository-validation/SKILL.md)
-for local solution checks when application/build changes require them.
+[github-pipeline-policy](../github-pipeline-policy/SKILL.md) for approval enforcement.
+Use [repository-validation](../repository-validation/SKILL.md) for local solution
+checks when application/build changes require them.
+
+Run tests/ReleasePipeline/test-publish-test.ps1 in validation before packaging.
+Keep all installer checks after the approved merge; never restore a PR/manual workflow.
 
 ## Promotion identity
 
@@ -49,14 +50,14 @@ Packaging depends on validation. Promotion smoke jobs download the actual
 candidate artifacts onto separate Windows runners and call test-installer.ps1.
 Do not reimplement the install/window/version/uninstall checks in YAML. Preserve
 always-uploaded failure diagnostics and 90-day Actions artifact retention.
-Read deploy/BETA-TESTING.md for the remaining clean-machine and upgrade checks;
+Read deploy/TESTING.md for the remaining clean-machine and upgrade checks;
 hosted smoke success does not prove those manual requirements passed.
 
 ## Publish GitHub pre-releases
 
 Publishing depends on validation, packaging and both smoke jobs succeeding.
 Only this job needs contents: write; other promotion jobs remain read-only.
-Use publish-beta.ps1 to verify matching PASS evidence and candidate identity before
+Use publish-test.ps1 to verify matching PASS evidence and candidate identity before
 publishing tag v<version> at the exact tested commit. Attach both installers,
 architecture handoff/smoke archives, solution test reports and SHA256 checksums.
 Notes must distinguish automated success from pending manual checks.
@@ -77,3 +78,6 @@ Check the test badge against this workflow, not another branch's run.
 Separate local results, hosted jobs, actual pre-release publication and manual
 verification in reports. After an authorized promotion, verify release tag/commit,
 assets, notes and recorded smoke results before claiming publication succeeded.
+
+Follow [github-pipeline-policy](../github-pipeline-policy/SKILL.md) for mandatory
+approval enforcement, canonical stage names and negative trigger checks.
