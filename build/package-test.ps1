@@ -12,9 +12,9 @@ $root = Split-Path $PSScriptRoot
 Set-Location $root
 $base = (Get-Content deploy/version.json -Raw | ConvertFrom-Json).version
 if ($base -notmatch '^\d+\.\d+\.\d+$') { throw 'Expected a three-part base version.' }
-$candidate = "$base-beta.$BuildNumber.$Attempt"
+$candidate = "$base-test.$BuildNumber.$Attempt"
 $numeric = "$base.$BuildNumber"
-$output = Join-Path $root "artifacts/beta-$Architecture"
+$output = Join-Path $root "artifacts/test-$Architecture"
 $publish = Join-Path $root "artifacts/publish-$Architecture"
 # Do not carry obsolete installers or resources into a new candidate.
 $artifactsRoot = [IO.Path]::GetFullPath((Join-Path $root 'artifacts')) + [IO.Path]::DirectorySeparatorChar
@@ -34,7 +34,7 @@ $compiler = $CompilerPath
 if (!(Test-Path $compiler)) { throw 'Install Inno Setup 6 before packaging.' }
 & $compiler /Q "/DPublishDir=$publish" "/DOutputDir=$output" "/DArchitecture=$Architecture" "/DCandidateVersion=$candidate" "/DNumericVersion=$numeric" deploy/installer.iss
 if ($LASTEXITCODE) { throw "Installer compilation failed: $LASTEXITCODE" }
-Copy-Item LICENSE, deploy/BETA-TESTING.md, deploy/KNOWN-ISSUES.md $output
+Copy-Item LICENSE, deploy/TESTING.md, deploy/KNOWN-ISSUES.md $output
 git log "$PreviousTestCommit..$Commit" --pretty=format:'%h %s' | Set-Content "$output/CHANGES.txt"
 if ($LASTEXITCODE) { throw 'Could not generate change summary.' }
 Copy-Item deploy/test-results-template.md "$output/test-results.md"

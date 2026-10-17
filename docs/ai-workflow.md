@@ -18,8 +18,8 @@ and name the integration stage or PR check they own.
 | Skill | Owns | Reuses / boundary |
 | --- | --- | --- |
 | [github-develop-merge-action](../.agents/skills/github-develop-merge-action/SKILL.md) | develop-build-test.yml: merged develop PRs, solution build/tests, NuGet Audit, Gitleaks, CodeQL | Local solution validation; no installer/release jobs |
-| [github-test-merge-action](../.agents/skills/github-test-merge-action/SKILL.md) | test-beta.yml: develop-to-test promotion, shared packaging/smoke/release helpers, beta pre-releases | Local solution validation and tester procedures; no develop scans or PR event setup |
-| [github-installer-pr-action](../.agents/skills/github-installer-pr-action/SKILL.md) | installer-smoke.yml: pre-merge/manual review checks and evidence | Shared installer helpers and release failure tests; no public publishing or develop scans |
+| [github-test-merge-action](../.agents/skills/github-test-merge-action/SKILL.md) | test.yml: develop-to-test promotion, shared packaging/smoke/release helpers, test pre-releases | Local solution validation and tester procedures; no develop scans or PR event setup |
+| [github-pipeline-policy](../.agents/skills/github-pipeline-policy/SKILL.md) | develop/test/prod naming, approved-merge triggers and branch protections | Stage skills own their jobs; no pre-merge/manual installer workflow |
 | [dotnet-test-project](../.agents/skills/dotnet-test-project/SKILL.md) | .NET test-project/framework/discovery setup and local full-suite failure handling | Shared local solution validation; routes workflow changes to their stage owner |
 | [repository-validation](../.agents/skills/repository-validation/SKILL.md) | Shared local solution validation and clean-diff checks | Canonical commands in AI.md; no workflow configuration |
 
@@ -28,11 +28,11 @@ responsibility. Keep reusable mechanics in build/ scripts and tester procedures
 in deploy/ documentation. Update both callers when a shared helper contract changes.
 Do not copy helper implementations or create parallel skills for the same workflow.
 
-Some execution repeats are intentional: the test promotion validates its own merge
-commit and actual candidate artifacts, while PR checks validate a review merge.
-CodeQL needs a separate instrumented compilation for extraction. These checks
-serve distinct requirements and do not justify duplicating their skill procedures.
-No main/release-to-production workflow exists, so there is no placeholder main skill.
+The test pipeline validates its exact merge commit and actual candidate installers.
+CodeQL requires an instrumented compilation. Installer preparation/failure-guard
+checks run in test validation, after the approved merge. No PR/manual installer
+workflow exists. The prod pipeline (main branch) is not configured.
+Read AI.md for branch approval and trigger policy.
 
 Tools supporting this discovery convention may expose the skills; otherwise read
 the selected file explicitly and execute its instructions.

@@ -1,18 +1,18 @@
 # Onyx Open Terminal UI
 
 [![develop pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/develop-build-test.yml?event=pull_request&label=develop)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/develop-build-test.yml)
-[![test pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/test-beta.yml?event=pull_request&label=test)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/test-beta.yml)
-[![main pipeline not configured](https://img.shields.io/badge/main-not%20configured-lightgrey)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions?query=branch%3Amain)
+[![test pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/test.yml?event=pull_request&label=test)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/test.yml)
+[![prod pipeline not configured](https://img.shields.io/badge/prod-not%20configured-lightgrey)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions?query=branch%3Amain)
 
 Badges show the latest result of each branch's dedicated integration workflow.
 The `test` badge reports automated testing, packaging, installer smoke tests and
 pre-release publishing; manual clean-machine and upgrade verification is recorded
 separately. Until its first run, a workflow
-badge may show no status. A `main` pipeline has not yet been configured.
+badge may show no status. A `prod` pipeline (`main` branch) has not yet been configured.
 
 Onyx Open Terminal UI WinUI desktop application.
 
-Beta installers are published as [GitHub pre-releases](https://github.com/onyx-open-labs/onyx-open-terminal-ui/releases)
+Test installers are published as [GitHub pre-releases](https://github.com/onyx-open-labs/onyx-open-terminal-ui/releases)
 after successful develop-to-test promotion and x64/x86 installer smoke tests.
 Each pre-release includes installers, release notes, checksums and test evidence.
 
@@ -102,14 +102,14 @@ targeting `develop`. Its build-and-test job runs only when the PR was merged;
 closing without merging produces a skipped job and executes no build or tests.
 PRs targeting other branches do not start this workflow.
 
-The Windows runner checks out the updated `develop` branch, installs the SDK
+The Windows runner checks out the event's exact merged commit, installs the SDK
 from `global.json`, restores dependencies, builds Release, and runs every test
 project in the solution. Each command has its own logged step and a non-zero
 exit code fails the job. Test output appears in the logs, and available TRX
 results are uploaded as a workflow artifact even when tests fail.
 
 To verify after merging, open the repository's Actions tab and select
-"Build, test, and security after develop merge". Confirm the checkout, SDK, restore,
+"develop". Confirm the checkout, SDK, restore,
 build, and test steps pass and download the test-results artifact as needed.
 
 ### Security checks
@@ -130,3 +130,13 @@ failure does not prevent the other jobs from running:
   review and may include false positives. CodeQL is free for this public repo;
   private repositories require GitHub Code Security. Use advanced setup for
   this workflow; GitHub's CodeQL default setup must be disabled if enabled.
+
+## Approval and pipeline names
+
+The pipelines are develop, test and prod; prod uses the main Git branch and is
+not yet configured. Require an approved PR before merging into each branch.
+Branch protection must enforce approvals (including administrators), dismiss stale
+approvals and block direct/force pushes. No Actions checks are required before
+merging because jobs run after the approved merge. PR creation, updates, approval
+alone and manual dispatch do not run pipeline jobs. Closing an unmerged PR may
+create a skipped workflow entry; it executes no jobs. See AI.md for the policy.
