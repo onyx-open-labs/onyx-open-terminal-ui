@@ -6,6 +6,11 @@ namespace Onyx.OpenTerminal.WinUI;
 
 public sealed partial class MainWindow : Window
 {
+    public NavigationView NavigationView
+    {
+        get { return NavigationViewControl; }
+    }
+
     public MainWindow()
     {
         InitializeComponent();
@@ -15,8 +20,7 @@ public sealed partial class MainWindow : Window
             .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
             .Single().InformationalVersion.Split('+')[0];
         Title = $"Onyx Open Terminal {version}";
-        var navigationView = (NavigationView)Content;
-        navigationView.SelectedItem = HomeNavigationItem;
+        NavigationView.SelectedItem = HomeNavigationItem;
     }
 
     private void Navigation_SelectionChanged(
