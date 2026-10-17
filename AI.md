@@ -30,6 +30,26 @@ build outputs, or personal settings. Work from develop on a feature branch.
 Use pull requests for merges into develop, test, and main. Do not directly push
 to these branches or merge a pull request without the user's authorization.
 
+## Pipeline approval policy
+
+Name pipelines `develop`, `test` and `prod`; the production Git branch is `main`.
+Run GitHub Actions jobs only after Chris reviews and manually merges the PR.
+For this solo-maintainer project, that manual merge is the approval decision;
+GitHub does not allow authors to submit approving reviews on their own PRs.
+Do not add push, PR-open/update/review, schedule or manual-dispatch triggers.
+Use `pull_request`, `types: [closed]`, a target branch filter and merged job guards.
+An unmerged closure may create a skipped workflow entry but must execute no jobs.
+Require a PR through branch protection on develop/test/main, including for admins.
+Set required approvals to zero; disable code-owner and latest-push approval
+requirements so Chris can merge his own PR after review. Block direct/force
+pushes and deletion, and retain no bypass allowance. Do not enable auto-merge
+or merge a PR on Chris's behalf without his explicit merge instruction.
+Do not require pre-merge Actions checks when Actions only run after merging.
+GitHub records the merge decision; it does not enforce a separate self-approval.
+Verify repository settings as well as YAML. Use the exact event merge commit
+for every checkout.
+The prod pipeline is not implemented; do not invent release behavior without requirements.
+
 ## Agents and Skills
 
 Read docs/ai-workflow.md. Specialised briefs are in agents/; reusable skills are
@@ -44,8 +64,8 @@ Select the skill owning the workflow being changed:
   post-merge develop build/tests and security scans.
 - [github-test-merge-action](.agents/skills/github-test-merge-action/SKILL.md):
   develop-to-test promotion, shared installer/release helpers, smoke tests and pre-releases.
-- [github-installer-pr-action](.agents/skills/github-installer-pr-action/SKILL.md):
-  pre-merge installer validation and review evidence.
+- [github-pipeline-policy](.agents/skills/github-pipeline-policy/SKILL.md):
+  approval enforcement, stage naming and trigger validation.
 
 Use repository-validation for shared local solution checks and dotnet-test-project
 for test-project setup. Workflow skills reuse these helpers rather than owning

@@ -1,6 +1,6 @@
 ---
 name: github-develop-merge-action
-description: Create, repair, or review this project's GitHub Actions workflow after PR merges into develop, including solution build/tests, NuGet Audit, Gitleaks and CodeQL. Use for develop integration checks, not beta packaging, release publishing, pre-merge installer checks or .NET test-project setup.
+description: Create, repair, or review this project's GitHub Actions workflow after PR merges into develop, including solution build/tests, NuGet Audit, Gitleaks and CodeQL. Use for develop integration checks, not test packaging, release publishing, pre-merge installer checks or .NET test-project setup.
 ---
 
 # GitHub Develop Merge Action
@@ -9,9 +9,9 @@ description: Create, repair, or review this project's GitHub Actions workflow af
 
 Own `.github/workflows/develop-build-test.yml`: its merge event, build/test job,
 three security jobs, permissions, reports and develop status badge. This skill
-does not own test-branch packaging/releases or the installer PR workflow; use
-[github-test-merge-action](../github-test-merge-action/SKILL.md) and
-[github-installer-pr-action](../github-installer-pr-action/SKILL.md) for those.
+does not own test-branch packaging/releases; use
+[github-test-merge-action](../github-test-merge-action/SKILL.md) for test packaging; use
+[github-pipeline-policy](../github-pipeline-policy/SKILL.md) for approval enforcement.
 Keep test-project setup in [dotnet-test-project](../dotnet-test-project/SKILL.md)
 and local solution validation in [repository-validation](../repository-validation/SKILL.md).
 
@@ -43,9 +43,8 @@ skipped workflow entry; describe this accurately instead of claiming no event
 occurred. Do not substitute an unrestricted push trigger, which includes
 direct pushes, or add PR/scheduled triggers without a requested scope change.
 
-Explicitly check out the requested updated integration branch. Record the
-actual scanned commit and associate uploaded code-scanning results with that
-branch and SHA; do not assume the event SHA matches a later branch checkout.
+Check out the exact event merge_commit_sha for every job. Record the scanned
+commit and associate code-scanning results with develop and that SHA.
 Keep independent scans independent of the build/test job so one failure does
 not prevent other checks. Give jobs timeouts and grant write permissions only
 to jobs that need them, such as CodeQL's `security-events: write`.
@@ -144,3 +143,6 @@ tool's configuration:
 - [Code scanning eligibility](https://docs.github.com/en/code-security/concepts/code-scanning/code-scanning)
 - [CodeQL Action build modes and supported versions](https://github.com/github/codeql-action)
 - [CodeQL workflow configuration](https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options)
+
+Follow [github-pipeline-policy](../github-pipeline-policy/SKILL.md) for mandatory
+approval enforcement, canonical stage names and negative trigger checks.

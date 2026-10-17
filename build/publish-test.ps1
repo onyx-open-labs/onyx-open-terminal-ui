@@ -15,9 +15,9 @@ if (Test-Path -LiteralPath $output) {
 $candidates = @{}
 $version = $null
 foreach ($architecture in @('x64', 'x86')) {
-    $directory = Join-Path $inputRoot "beta-$architecture"
+    $directory = Join-Path $inputRoot "test-$architecture"
     $metadata = Get-Content -LiteralPath (Join-Path $directory 'release.json') -Raw | ConvertFrom-Json
-    if ($metadata.version -notmatch '^\d+\.\d+\.\d+-beta\.\d+\.\d+$') { throw "Invalid candidate version for $architecture." }
+    if ($metadata.version -notmatch '^\d+\.\d+\.\d+-test\.\d+\.\d+$') { throw "Invalid candidate version for $architecture." }
     if (!$version) { $version = $metadata.version }
     if ($metadata.version -ne $version -or $metadata.commit -ne $Commit -or $metadata.architecture -ne $architecture -or $metadata.workflow -ne $RunUrl) {
         throw "Candidate identity mismatch for $architecture."
@@ -34,7 +34,7 @@ foreach ($architecture in @('x64', 'x86')) {
     if ($installers.Count -ne 1 -or $installers[0].Name -ne "OnyxOpenTerminal-$version-$architecture-setup.exe") {
         throw "Expected exactly one correctly named installer for $architecture."
     }
-    foreach ($file in @('BETA-TESTING.md', 'KNOWN-ISSUES.md', 'CHANGES.txt', 'LICENSE', 'test-results.md')) {
+    foreach ($file in @('TESTING.md', 'KNOWN-ISSUES.md', 'CHANGES.txt', 'LICENSE', 'test-results.md')) {
         if (!(Test-Path -LiteralPath (Join-Path $directory $file))) { throw "Missing tester handoff file: $architecture/$file" }
     }
     $candidates[$architecture] = @{directory=$directory; smoke=$smokeDirectory; installer=$installers[0].FullName}
@@ -67,7 +67,7 @@ $assets.Add($checksums)
 $changes = Get-Content -LiteralPath (Join-Path $candidates.x64.directory 'CHANGES.txt') -Raw
 $knownIssues = Get-Content -LiteralPath (Join-Path $candidates.x64.directory 'KNOWN-ISSUES.md') -Raw
 $notes = @"
-Onyx Open Terminal $version — beta pre-release
+Onyx Open Terminal $version — test pre-release
 
 Organisation: Onyx Open Labs. Licence: MIT.
 Source commit: $Commit
@@ -86,8 +86,8 @@ SHA256SUMS.txt contains checksums for the installers and evidence archives.
 Solution build/tests and x64/x86 installer smoke tests passed before publication.
 Smoke checks cover installation, metadata, shortcut target, a visible responsive
 window with the expected version, and uninstall.
-Manual clean-machine and previous-beta upgrade/data-preservation checks remain
-pending. This pre-release is available for beta testing; it is not a production release.
+Manual clean-machine and previous-test upgrade/data-preservation checks remain
+pending. This pre-release is available for test testing; it is not a production release.
 
 ## Changes since the previous test commit
 
@@ -104,7 +104,7 @@ $tag = "v$version"
     ConvertTo-Json -Depth 4 | Set-Content (Join-Path $output 'release-plan.json')
 Write-Host "Prepared $tag from $Commit with $($assets.Count) assets; both architecture smoke results passed."
 if ($PrepareOnly) { return }
-if (!(Get-Command gh -ErrorAction SilentlyContinue)) { throw 'GitHub CLI is required to publish a beta pre-release.' }
+if (!(Get-Command gh -ErrorAction SilentlyContinue)) { throw 'GitHub CLI is required to publish a test pre-release.' }
 $referencesJson = & gh api "repos/$Repository/git/matching-refs/tags/$tag"
 if ($LASTEXITCODE) { throw 'Could not verify that the release tag is available.' }
 $references = ($referencesJson -join "`n") | ConvertFrom-Json

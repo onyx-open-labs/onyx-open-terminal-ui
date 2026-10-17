@@ -1,13 +1,13 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path (Split-Path $PSScriptRoot)
-$script = Join-Path $root 'build/publish-beta.ps1'
+$script = Join-Path $root 'build/publish-test.ps1'
 $fixture = Join-Path $root "artifacts/release-tests-$([Guid]::NewGuid().ToString('N'))"
 $inputRoot = Join-Path $fixture 'input'
 $commit = '1234567890123456789012345678901234567890'
-$version = '0.1.0-beta.42.1'
+$version = '0.1.0-test.42.1'
 $runUrl = 'https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/runs/42'
 foreach ($architecture in @('x64', 'x86')) {
-    $candidate = Join-Path $inputRoot "beta-$architecture"
+    $candidate = Join-Path $inputRoot "test-$architecture"
     $smoke = Join-Path $inputRoot "smoke-$architecture"
     New-Item -ItemType Directory -Force -Path $candidate, $smoke | Out-Null
     @{product='Onyx Open Terminal'; organisation='Onyx Open Labs'; licence='MIT'; version=$version;
@@ -16,7 +16,7 @@ foreach ($architecture in @('x64', 'x86')) {
     @{status='PASS'; version=$version; architecture=$architecture; commit=$commit} |
         ConvertTo-Json | Set-Content (Join-Path $smoke 'result.json')
     'fixture installer bytes' | Set-Content (Join-Path $candidate "OnyxOpenTerminal-$version-$architecture-setup.exe")
-    foreach ($file in @('BETA-TESTING.md', 'KNOWN-ISSUES.md', 'CHANGES.txt', 'LICENSE', 'test-results.md')) {
+    foreach ($file in @('TESTING.md', 'KNOWN-ISSUES.md', 'CHANGES.txt', 'LICENSE', 'test-results.md')) {
         "Fixture $file" | Set-Content (Join-Path $candidate $file)
     }
 }
@@ -55,14 +55,14 @@ $result.commit = 'ffffffffffffffffffffffffffffffffffffffff'
 $result | ConvertTo-Json | Set-Content $smokeFile
 Assert-Rejected 'wrong-smoke-commit' 'Passing smoke evidence'
 $originalSmoke | Set-Content $smokeFile
-$identityFile = Join-Path $inputRoot 'beta-x86/release.json'
+$identityFile = Join-Path $inputRoot 'test-x86/release.json'
 $originalIdentity = Get-Content $identityFile -Raw
 $identity = $originalIdentity | ConvertFrom-Json
-$identity.version = '0.1.0-beta.43.1'
+$identity.version = '0.1.0-test.43.1'
 $identity | ConvertTo-Json | Set-Content $identityFile
 Assert-Rejected 'different-architecture-version' 'Candidate identity mismatch'
 $originalIdentity | Set-Content $identityFile
-$installer = Join-Path $inputRoot "beta-x86/OnyxOpenTerminal-$version-x86-setup.exe"
+$installer = Join-Path $inputRoot "test-x86/OnyxOpenTerminal-$version-x86-setup.exe"
 Move-Item -LiteralPath $installer -Destination "$installer.hidden"
 Assert-Rejected 'missing-installer' 'Expected exactly one'
 Move-Item -LiteralPath "$installer.hidden" -Destination $installer

@@ -1,4 +1,4 @@
-name: Package beta after develop merges into test
+name: test
 on:
   pull_request:
     branches: [test]
@@ -20,13 +20,15 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
+      - name: Validate release preparation and failure guards
+        run: ./tests/ReleasePipeline/test-publish-test.ps1
       - run: dotnet restore Onyx.OpenTerminal.sln
       - run: dotnet build Onyx.OpenTerminal.sln -c Release --no-restore
       - run: dotnet test Onyx.OpenTerminal.sln -c Release --no-build --logger trx --results-directory TestResults
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: beta-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: TestResults/*.trx
           retention-days: 90
           if-no-files-found: ignore
@@ -57,12 +59,12 @@ jobs:
           SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
           PREVIOUS_TEST_COMMIT: ${{ github.event.pull_request.base.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: ./build/package-beta.ps1 -Architecture '${{ matrix.architecture }}' -BuildNumber $env:GITHUB_RUN_NUMBER -Attempt $env:GITHUB_RUN_ATTEMPT -Commit $env:SOURCE_COMMIT -PreviousTestCommit $env:PREVIOUS_TEST_COMMIT -RunUrl $env:RUN_URL -CompilerPath "$env:RUNNER_TEMP/inno/ISCC.exe"
+        run: ./build/package-test.ps1 -Architecture '${{ matrix.architecture }}' -BuildNumber $env:GITHUB_RUN_NUMBER -Attempt $env:GITHUB_RUN_ATTEMPT -Commit $env:SOURCE_COMMIT -PreviousTestCommit $env:PREVIOUS_TEST_COMMIT -RunUrl $env:RUN_URL -CompilerPath "$env:RUNNER_TEMP/inno/ISCC.exe"
       - name: Upload candidate and tester handoff
         uses: actions/upload-artifact@v4
         with:
-          name: beta-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: artifacts/beta-${{ matrix.architecture }}/*
+          name: test-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/test-${{ matrix.architecture }}/*
           retention-days: 90
           if-no-files-found: error
   smoke:
@@ -80,7 +82,7 @@ jobs:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
       - uses: actions/download-artifact@v4
         with:
-          name: beta-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: test-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: candidate
       - name: Install, launch, verify version and uninstall
         shell: pwsh
@@ -97,7 +99,7 @@ jobs:
           retention-days: 90
           if-no-files-found: error
   release:
-    name: Publish GitHub beta pre-release
+    name: Publish GitHub test pre-release
     needs: [validate, package, smoke]
     runs-on: windows-2025
     timeout-minutes: 15
@@ -109,12 +111,12 @@ jobs:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
       - uses: actions/download-artifact@v4
         with:
-          name: beta-x64-${{ github.run_id }}-${{ github.run_attempt }}
-          path: artifacts/release-input/beta-x64
+          name: test-x64-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/test-x64
       - uses: actions/download-artifact@v4
         with:
-          name: beta-x86-${{ github.run_id }}-${{ github.run_attempt }}
-          path: artifacts/release-input/beta-x86
+          name: test-x86-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/release-input/test-x86
       - uses: actions/download-artifact@v4
         with:
           name: installer-smoke-x64-${{ github.run_id }}-${{ github.run_attempt }}
@@ -125,7 +127,7 @@ jobs:
           path: artifacts/release-input/smoke-x86
       - uses: actions/download-artifact@v4
         with:
-          name: beta-test-results-${{ github.run_id }}-${{ github.run_attempt }}
+          name: test-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/release-input/unit-tests
       - name: Verify evidence and publish pre-release with installers
         shell: pwsh
@@ -134,12 +136,12 @@ jobs:
           SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
           RELEASE_REPOSITORY: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: ./build/publish-beta.ps1 -ArtifactDirectory artifacts/release-input -OutputDirectory artifacts/release-output -Commit $env:SOURCE_COMMIT -Repository $env:RELEASE_REPOSITORY -RunUrl $env:RUN_URL
+        run: ./build/publish-test.ps1 -ArtifactDirectory artifacts/release-input -OutputDirectory artifacts/release-output -Commit $env:SOURCE_COMMIT -Repository $env:RELEASE_REPOSITORY -RunUrl $env:RUN_URL
       - name: Upload release preparation diagnostics
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: beta-release-preparation-${{ github.run_id }}-${{ github.run_attempt }}
+          name: test-release-preparation-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             artifacts/release-output/release-notes.md
             artifacts/release-output/release-plan.json
