@@ -1,4 +1,6 @@
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Onyx.OpenTerminal.WinUI.Views;
 
 namespace Onyx.OpenTerminal.WinUI;
 
@@ -13,5 +15,21 @@ public sealed partial class MainWindow : Window
             .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
             .Single().InformationalVersion.Split('+')[0];
         Title = $"Onyx Open Terminal {version}";
+        Navigation.SelectedItem = HomeNavigationItem;
+    }
+
+    private void Navigation_SelectionChanged(
+        NavigationView sender,
+        NavigationViewSelectionChangedEventArgs args)
+    {
+        if (args.SelectedItem == HomeNavigationItem)
+        {
+            if (ContentFrame.CurrentSourcePageType != typeof(HomePage))
+            {
+                ContentFrame.Navigate(typeof(HomePage));
+            }
+
+            sender.Header = "Home";
+        }
     }
 }
