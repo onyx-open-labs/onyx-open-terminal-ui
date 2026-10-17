@@ -143,3 +143,10 @@ No Actions checks are required before merging because jobs run after the merge.
 PR creation, updates, review and manual dispatch do not run pipeline jobs.
 Closing an unmerged PR may
 create a skipped workflow entry; it executes no jobs. See AI.md for the policy.
+
+## Code signing policy
+
+See [code signing policy and activation steps](deploy/CODE-SIGNING.md).
+Signing provider enrolment is pending. New test releases require trusted signing;
+previously published unsigned assets remain unsigned.
+
