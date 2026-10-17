@@ -24,7 +24,7 @@
     <NavigationView x:Name="NavigationViewControl" Grid.Row="1"
                     PaneDisplayMode="Left"
                     IsPaneOpen="True"
-                    IsSettingsVisible="False"
+                    IsSettingsVisible="True"
                     IsBackButtonVisible="Collapsed"
                     IsPaneToggleButtonVisible="False"
                     Header="Home"
@@ -37,8 +37,13 @@
                     <SymbolIcon Symbol="Home" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem x:Name="TerminalNavigationItem" Content="Terminal Session"
-                                AutomationProperties.Name="Terminal Session" Icon="Globe" />
+            <NavigationViewItem x:Name="TerminalNavigationItem" Content="Terminal View"
+                                AutomationProperties.Name="Terminal View" Icon="Globe" IsEnabled="False">
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Name="TerminalConfigurationTip"
+                             Content="Configure a Terminal URL in Settings to enable Terminal View." />
+                </ToolTipService.ToolTip>
+            </NavigationViewItem>
         </NavigationView.MenuItems>
         <Grid>
         <Frame x:Name="ContentFrame"
