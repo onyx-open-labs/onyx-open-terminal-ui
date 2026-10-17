@@ -14,16 +14,56 @@ separately. Until its first run, a workflow
 badge may show no status. The `prod` pipeline promotes validated signed test artifacts
 after an approved merge into `main`; see deploy/PRODUCTION.md.
 
-Onyx Open Terminal UI WinUI desktop application.
+Onyx Open Terminal is a Windows desktop application built with WinUI and an
+embedded Microsoft Edge WebView2 browser. Configure a website in Settings, then
+use Terminal View to access it inside the application.
 
-The application opens with an expanded left navigation pane and Home selected.
-Home displays the basic welcome page. The navigation pane toggle remains available;
-resizing the window does not automatically change the configured Left mode.
+## Current functionality
 
-Terminal Session opens Google in an embedded WebView with Back/Forward controls,
-loading feedback and Retry on failure. All web links stay inside the application.
-The current page and history survive switching to Home and back. Microsoft Edge
-WebView2 Runtime is required. See [behavior and manual checks](docs/terminal-session-validation.md).
+- **Home:** the app starts on a centered welcome page with the left navigation
+  pane expanded. The toolbar toggle opens and closes the pane.
+- **Terminal View:** opens your configured HTTP or HTTPS website in the embedded
+  browser, with Back and Forward controls, loading feedback, and Retry when
+  initialization or navigation fails.
+- **Settings:** available at the bottom of the navigation pane, with a
+  WinUI Gallery-inspired setting card, light/dark theme colors, and a URL editor
+  that adapts to the window width.
+
+### Configure Terminal View
+
+1. Select **Settings** at the bottom of the navigation pane.
+2. Enter a full Terminal URL beginning with `https://` or `http://`.
+3. Select **Save**, then select **Terminal View**.
+
+The default URL is `about:blank`. Until a website is configured, Terminal View
+remains visible but disabled. Hover over it to see:
+“Configure a Terminal URL in Settings to enable Terminal View.”
+
+Save an empty value, whitespace, or `about:blank` to disable Terminal View again.
+Invalid URLs show an error without replacing the saved value. Save failures
+also display an error.
+
+### Settings and browser sessions
+
+The Terminal URL is saved per user in
+`%LOCALAPPDATA%/Onyx/OpenTerminal/settings.json` and survives application restarts.
+Missing, unreadable, or damaged settings fall back to `about:blank`.
+
+Saving a different URL applies it the next time Terminal View opens. Switching
+to Home or Settings and back without changing the URL preserves the current
+page and browser history during the application session. Clearing the URL closes
+the retained browser and disables Terminal View. Browser history restoration
+across application restarts is not implemented.
+
+HTTP and HTTPS links stay in the embedded browser. Requests for a new window or
+tab use the existing browser; external protocols are blocked. Websites that
+require separate popup windows may not work with this single-browser design.
+Microsoft Edge WebView2 Runtime is required to use Terminal View.
+
+See [Terminal settings and session checks](docs/terminal-settings-validation.md)
+for manual verification.
+
+## Test installers
 
 Test installers are published as [GitHub pre-releases](https://github.com/onyx-open-labs/onyx-open-terminal-ui/releases)
 after successful develop-to-test promotion and x64/x86 installer smoke tests.
@@ -34,6 +74,7 @@ Each pre-release includes installers, release notes, checksums and test evidence
 - .NET 10 SDK 10.0.301 or a later stable 10.0 SDK (see global.json).
 - PowerShell 7 for the optional build scripts.
 - Internet access to NuGet.org for initial restore.
+- Microsoft Edge WebView2 Runtime to use Terminal View.
 - Windows 10 version 1809 or later with WinUI development tooling for the desktop host.
 
 ## Build and Test
@@ -52,10 +93,10 @@ The solution can be opened in a Visual Studio version supporting .NET 10.
 ## Structure
 
 - `src/Onyx.OpenTerminal.WinUI/`: unpackaged WinUI desktop application.
-- `tests/Onyx.OpenTerminal.WinUI.Tests/`: window configuration tests.
+- `tests/Onyx.OpenTerminal.WinUI.Tests/`: shell, URL policy, and settings tests.
 - `docs/`: architecture, decisions, and agent workflows.
 - `build/`: restore/build/test automation.
-- `deploy/`: reserved deployment documentation.
+- `deploy/`: installer assets, release configuration, and deployment documentation.
 - `AI.md`: shared AI guidance; `AGENTS.md` points agents to it.
 - `agents/`: manually selected specialised-agent briefs.
 - `.agents/skills/`: repository skills in SKILL.md format.
@@ -103,10 +144,16 @@ failure is checked by the caller. Do not use --no-build without first building.
 
 `tests/Onyx.OpenTerminal.WinUI.Tests/` uses xUnit and the Visual Studio test
 adapter with Microsoft.NET.Test.Sdk. It targets the application's Windows .NET
-10 framework and defaults to x64 (x86 follows the solution configuration). Its project reference tests the compiled desktop
-host's window type; a copied production XAML file verifies the declared title
-and centered welcome text. These tests do not activate a window or require an
-interactive desktop. They are configuration tests, not UI automation.
+10 framework and defaults to x64 (x86 follows the solution configuration).
+Tests cover the compiled window type, navigation and tooltip declarations,
+the centered Home welcome text, HTTP/HTTPS navigation policy, and Terminal URL
+settings. Settings coverage includes first-run defaults, saving and reloading,
+change notifications, clearing the URL, rejecting invalid URLs, and fallback
+when the settings file is damaged.
+
+The suite does not activate a window or require an interactive desktop. Use the
+manual checklists linked above to verify visual layout, tooltip interaction,
+embedded browser behavior, and save-error feedback.
 
 ## GitHub Actions after integration
 
