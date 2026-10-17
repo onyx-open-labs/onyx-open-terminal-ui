@@ -23,7 +23,7 @@ public sealed class MainWindowTests
         Assert.Equal(presentation + "Window", window.Name);
         Assert.Equal(typeof(MainWindow).FullName, (string?)window.Attribute(xaml + "Class"));
         Assert.Equal("Onyx Open Terminal", (string?)window.Attribute("Title"));
-        var navigation = Assert.Single(window.Elements(presentation + "NavigationView"));
+        var navigation = Assert.Single(window.Descendants(presentation + "NavigationView"));
         Assert.Equal("Left", (string?)navigation.Attribute("PaneDisplayMode"));
         Assert.Equal("True", (string?)navigation.Attribute("IsPaneOpen"));
         Assert.Equal("False", (string?)navigation.Attribute("IsSettingsVisible"));
@@ -32,7 +32,7 @@ public sealed class MainWindowTests
         Assert.Equal("Home", (string?)home.Attribute("Content"));
         Assert.Equal("Home", (string?)home.Attribute("AutomationProperties.Name"));
         Assert.Equal("Home", (string?)Assert.Single(home.Descendants(presentation + "SymbolIcon")).Attribute("Symbol"));
-        var frame = Assert.Single(navigation.Elements(presentation + "Frame"));
+        var frame = Assert.Single(navigation.Descendants(presentation + "Frame"));
         Assert.Equal("False", (string?)frame.Attribute("IsNavigationStackEnabled"));
     }
 
