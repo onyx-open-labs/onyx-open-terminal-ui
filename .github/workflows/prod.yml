@@ -29,7 +29,6 @@ jobs:
           SOURCE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
           TEST_COMMIT: ${{ github.event.pull_request.head.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          SIGNING_CERTIFICATE_SUBJECT: ${{ vars.SIGNING_CERTIFICATE_SUBJECT }}
         run: ./build/promote-prod.ps1 -Repository $env:RELEASE_REPOSITORY -Commit $env:SOURCE_COMMIT -TestCommit $env:TEST_COMMIT -RunUrl $env:RUN_URL -OutputDirectory artifacts/prod
       - name: Retain production artifacts and promotion evidence
         if: always()
