@@ -9,15 +9,17 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Spacing="4" Margin="8,4">
+            <Button AutomationProperties.Name="Toggle navigation pane"
+                    ToolTipService.ToolTip="Toggle navigation pane"
+                    Click="TogglePane_Click">
+                <SymbolIcon Symbol="GlobalNavigationButton" />
+            </Button>
             <Button x:Name="BackButton" Visibility="Collapsed" IsEnabled="False"
                     AutomationProperties.Name="Back" ToolTipService.ToolTip="Back"
                     Click="Back_Click"><SymbolIcon Symbol="Back" /></Button>
             <Button x:Name="ForwardButton" Visibility="Collapsed" IsEnabled="False"
                     AutomationProperties.Name="Forward" ToolTipService.ToolTip="Forward"
                     Click="Forward_Click"><SymbolIcon Symbol="Forward" /></Button>
-            <Button AutomationProperties.Name="Toggle navigation pane"
-                    ToolTipService.ToolTip="Toggle navigation pane"
-                    Click="TogglePane_Click"><SymbolIcon Symbol="GlobalNavigationButton" /></Button>
         </StackPanel>
     <NavigationView x:Name="NavigationViewControl" Grid.Row="1"
                     PaneDisplayMode="Left"
