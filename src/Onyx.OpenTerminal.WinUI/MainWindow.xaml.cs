@@ -59,7 +59,7 @@ public sealed partial class MainWindow : Window
         TerminalHost.Visibility = isTerminal ? Visibility.Visible : Visibility.Collapsed;
         BackButton.Visibility = ForwardButton.Visibility =
             isTerminal ? Visibility.Visible : Visibility.Collapsed;
-        sender.AlwaysShowHeader = !isTerminal;
+        sender.AlwaysShowHeader = !isTerminal && !args.IsSettingsSelected;
         if (isTerminal)
         {
             if (terminalPage is null || openedTerminalUrl != settings.TerminalUrl)
