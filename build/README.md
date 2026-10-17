@@ -1,5 +1,10 @@
 # Build Automation
 
+`promote-prod.ps1` resolves the successful test run and matching source trees.
+`prepare-prod.ps1` verifies downloaded release identity, checksums and signing
+evidence without rebuilding. See deploy/PRODUCTION.md. Run
+tests/ReleasePipeline/test-promote-prod.ps1 for offline failure-guard tests.
+
 Run build.ps1 to restore and build, and test.ps1 to restore, build, and test.
 Both scripts locate the solution relative to their own path and propagate
 failed command exit codes. Requires PowerShell 7 and the SDK in global.json.

@@ -23,4 +23,5 @@ work to github-test-merge-action; keep helper validation after the approved merg
 Verify branch approval settings through authenticated GitHub APIs, then check
 positive merge and negative push/open/update/manual/unmerged-close scenarios.
 Do not claim a settings change or hosted execution without inspecting its result.
-Keep prod documented as unconfigured until its behavior is separately specified.
+Route prod promotion to github-prod-merge-action. Preserve test evidence reuse
+and OOT-11 signing gates; do not duplicate passed checks or bypass missing evidence.
