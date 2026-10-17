@@ -1,14 +1,18 @@
 # Onyx Open Terminal UI
 
+Production promotes validated signed test installers without repeating passed
+checks. See [production promotion](deploy/PRODUCTION.md).
+
 [![develop pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/develop-build-test.yml?event=pull_request&label=develop)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/develop-build-test.yml)
 [![test pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/test.yml?event=pull_request&label=test)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/test.yml)
-[![prod pipeline not configured](https://img.shields.io/badge/prod-not%20configured-lightgrey)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions?query=branch%3Amain)
+[![prod pipeline](https://img.shields.io/github/actions/workflow/status/onyx-open-labs/onyx-open-terminal-ui/prod.yml?event=pull_request&label=prod)](https://github.com/onyx-open-labs/onyx-open-terminal-ui/actions/workflows/prod.yml)
 
 Badges show the latest result of each branch's dedicated integration workflow.
 The `test` badge reports automated testing, packaging, installer smoke tests and
 pre-release publishing; manual clean-machine and upgrade verification is recorded
 separately. Until its first run, a workflow
-badge may show no status. A `prod` pipeline (`main` branch) has not yet been configured.
+badge may show no status. The `prod` pipeline promotes validated signed test artifacts
+after an approved merge into `main`; see deploy/PRODUCTION.md.
 
 Onyx Open Terminal UI WinUI desktop application.
 
@@ -133,8 +137,8 @@ failure does not prevent the other jobs from running:
 
 ## Approval and pipeline names
 
-The pipelines are develop, test and prod; prod uses the main Git branch and is
-not yet configured. Chris reviews and manually merges each PR; this is the
+The pipelines are develop, test and prod; prod promotes test artifacts on the main
+Git branch. Chris reviews and manually merges each PR; this is the
 approval step for this solo-maintainer project. GitHub cannot accept an approving
 review from the PR author. Branch protection requires PRs, including for admins,
 with zero required approving reviews and no latest-push/code-owner approval.
