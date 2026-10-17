@@ -81,3 +81,13 @@ repository/organisation retention limit. Keep verified candidates available with
 that period; download archival copies before expiry if longer retention is needed.
 For rollback, back up user data, uninstall the candidate and reinstall the previous
 verified test release. Do not assume data migrated by a newer version supports downgrade.
+
+## Code signing verification
+
+Follow [CODE-SIGNING.md](CODE-SIGNING.md) for provider activation and clean-machine
+checks. Smoke tests require trusted, timestamped signatures with the configured
+certificate subject on the installer and installed application EXE/DLL. Evidence
+includes application-signatures.json and installer-signatures.json. Record the
+original Windows warning and remaining prompts after browser download; silent
+hosted smoke tests do not verify SmartScreen behavior.
+
